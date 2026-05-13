@@ -1,0 +1,77 @@
+﻿@{
+    ViewBag.Title = "Tool";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right" id="addTool">
+            <i class="fas fa-plus"></i> Add Tool
+        </button>
+    </div>
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="toolTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Tool Type</th>
+                        <th>Tool Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="toolModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Tool Details</h5>
+                <button type="button" id="close-tool" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Tool Type <span class="text-danger">*</span></label>
+                        <select id="ddlToolType" class="form-control">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Tool Name <span class="text-danger">*</span></label>
+                        <input type="text" id="txtToolName" class="form-control" placeholder="Enter Tool Name">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-tool" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-tool" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+           getTool: '@Url.Action("GetTool", "Tool", new { area = "Maintenance" })',
+           addTool: '@Url.Action("Create", "Tool", new { area = "Maintenance" })',
+           editTool: '@Url.Action("Edit", "Tool", new { area = "Maintenance" })',
+           deleteTool: '@Url.Action("Delete", "Tool", new { area = "Maintenance" })',
+
+           getToolType: '@Url.Action("GetToolType", "ToolType", new { area = "Maintenance" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Maintenance/tool.js"></script>
+}

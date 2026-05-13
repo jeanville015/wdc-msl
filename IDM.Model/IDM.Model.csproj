@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F0B6EF12-889C-4690-AE7C-08470C88B95F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IDM.Model</RootNamespace>
+    <AssemblyName>IDM.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\OperationResult.cs" />
+    <Compile Include="Common\SubmitResult.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="DocumentAudit.cs" />
+    <Compile Include="EDCSPCDataSending.cs" />
+    <Compile Include="Maintenance\Analysis.cs" />
+    <Compile Include="Maintenance\Area.cs" />
+    <Compile Include="Maintenance\DefectBulk.cs" />
+    <Compile Include="Maintenance\Defect.cs" />
+    <Compile Include="Maintenance\Manufacturer.cs" />
+    <Compile Include="Maintenance\Material.cs" />
+    <Compile Include="Maintenance\MaterialParameter.cs" />
+    <Compile Include="Maintenance\Parameter.cs" />
+    <Compile Include="Maintenance\Supplier.cs" />
+    <Compile Include="Maintenance\TestingSite.cs" />
+    <Compile Include="Maintenance\MaterialSettings.cs" />
+    <Compile Include="Maintenance\Tool.cs" />
+    <Compile Include="Maintenance\ToolType.cs" />
+    <Compile Include="Maintenance\Uom.cs" />
+    <Compile Include="Main\PendingData.cs" />
+    <Compile Include="Main\Data.cs" />
+    <Compile Include="Main\DynamicStaging.cs" />
+    <Compile Include="Main\IncomingData.cs" />
+    <Compile Include="Main\BDPUploadVariables.cs" />
+    <Compile Include="Main\SmallToolEntry.cs" />
+    <Compile Include="Main\Staging.cs" />
+    <Compile Include="Main\ToolEntryItems.cs" />
+    <Compile Include="Main\ParameterTrial.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="User\Account.cs" />
+    <Compile Include="User\Role.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

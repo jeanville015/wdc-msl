@@ -1,0 +1,106 @@
+﻿@using IDM.DTO.Main.View;
+@using IDM.DTO.Main;
+@using System.Collections.Generic
+@using System.Linq
+
+@model List<IDM.DTO.Main.PendingDataDTO>
+
+@if (Model != null)
+{
+    <!-- Tabs Logic --> 
+
+    <div class="table-responsive">
+        @*<table class="table table-bordered table-sm text-nowrap">*@
+        <table class="table table-hover align-middle w-100">
+            <thead class="thead-light">
+                <tr> 
+                    <th>Delivery Date</th> 
+                    <th>Received Date</th> 
+                    <th>Lot Number</th> 
+                    <th>Material No</th> 
+                    <th>Material Name</th> 
+                    <th>Job Number</th> 
+                    <th>Tool Id</th> 
+                    <th>Actions</th> 
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (PendingDataDTO item in Model) 
+                { 
+                    <tr>
+                        <td>@item.Delivery_Date</td>
+                        <td>@item.Received_Date</td>
+                        <td>@item.LotNumber</td>
+                        <td>@item.Material_No</td>
+                        <td>@item.Material_Name</td>
+                        <td>@item.Job_Number</td>
+                        <td>@item.ToolId</td>
+                        <td> 
+                            <button>Approve</button>
+                            <button>Cancel</button>
+                        </td>
+                    </tr>
+                } 
+            </tbody>
+        </table>
+    </div>
+
+}
+
+<!-- Reusable Large Modal -->
+<div class="modal fade" id="previewModal" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Preview</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+            <div class="modal-body text-center">
+                <img id="largeImage" src="" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal with details/gridview -->
+<div class="modal fade" id="sideBySideModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">DEFECT DETAILS</h4>
+                <div class="pull-right">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <!-- flex-nowrap ensures they NEVER stack/wrap below each other -->
+                <div class="row g-0" style="display: flex; flex-wrap: nowrap; align-items: stretch;">
+
+                    <!-- LEFT: Image Column - flex-grow allows it to take remaining space -->
+                    <div class="col-md-7 bg-light d-flex align-items-center justify-content-center border-end"
+                         style="min-height: 600px; overflow: hidden; flex: 1;">
+                        <img id="modalImageLeft" src="" class="img-responsive center-block" alt="Loading Image..."
+                             style="max-width: 100%; max-height: 600px; object-fit: contain;" />
+                    </div>
+
+                    <!-- RIGHT: Table Column -->
+                    <div class="table-column-container p-4">
+                        <h5 class="mb-3">Analysis Details</h5>
+                        <div class="analysis-table-wrapper">
+                            <div id="modalTableRightBody">
+                                <!-- PartialView (with <table>) lands here -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

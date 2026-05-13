@@ -1,0 +1,53 @@
+﻿@using IDM.DTO.Main;
+
+@{
+    ViewBag.Title = "Pending Data";
+
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    bool allowDecisionButtons = userRole == "Admin";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-body px-4 py-3">
+
+        <div class="table-responsive">
+            <table id="stagingTablecontainer" class="table table-hover align-middle w-100" style="display:none!important">
+                <thead class="text-dark">
+                </thead>
+                <tbody></tbody>
+            </table>
+            <table id="stagingTablecontainer" class="table table-hover align-middle w-100" style="display:none!important">
+                <thead class="text-dark">
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="subContainer" style="position: relative; min-height: 200px;">
+            <!-- Loading Overlay (Hidden by default) -->
+            <div id="loadingOverlay" style="display:none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.7); z-index: 10; text-align: center; padding-top: 50px;">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p>Loading...</p>
+            </div>
+
+            <!-- Area where Sub.cshtml will be loaded -->
+            <div id="partialContent"></div>
+        </div>
+
+    </div>
+
+    <div class="card-footer border-top bg-light px-4 py-3 d-flex justify-content-end gap-5"> 
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+           getPendingData: '@Url.Action("GetAllPendingDataAsync", "PendingData", new { area = "Main" })',
+           getPendingDataDetails: '@Url.Action("GetPendingDataDetailsAsync", "PendingData", new { area = "Main" })',
+           getData: '@Url.Action("GetDataAsync", "Data", new { area = "Main" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Main/pendingData.js"></script>
+}

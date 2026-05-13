@@ -1,0 +1,287 @@
+﻿@{
+    ViewBag.Title = "Small Tool Entry";
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body px-4 py-3">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-gray-light border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Details Input</h6>
+                <button type="button" class="btn btn-tool ml-auto" data-toggle="collapse" data-target="#detailsInfo" aria-expanded="true">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+
+            <div id="detailsInfo" class="card-body">
+                <!-- Initial Information Section -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-box me-2"></i> Entry Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Material No. <span class="text-danger">*</span></label>
+                                    <select id="ddlMaterial" class="form-control select2" style="width: 100%;">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Lot Number</label>
+                                    <input type="text" id="txtLotNumber" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Job Number</label>
+                                    <input type="text" id="txtJobNumber" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Tool Id</label>
+                                    <input type="text" id="txtToolId" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Analysis <span class="text-danger">*</span></label>
+                                    <select id="ddlAnalysis" class="form-control select2" style="width: 100%;">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Customer</label>
+                                    <input type="text" id="txtCustomer" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Material Name</label>
+                                    <input type="text" id="txtMaterialName" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Area Name</label>
+                                    <input type="text" id="txtAreaName" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Supplier Name</label>
+                                    <input type="text" id="txtSupplierName" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Manufacturer Name</label>
+                                    <input type="text" id="txtManufacturerName" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-gray-light border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Parameter Input</h6>
+                <button type="button" class="btn btn-tool ml-auto" data-toggle="collapse" data-target="#parametersInfo" aria-expanded="true">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+
+            <div class="card-body px-4 py-3" id="parametersInfo">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Parameter Name <span class="text-danger">*</span></label>
+                            <select id="ddlParameter" class="form-control">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Parameter Value</label>
+                            <input type="text" id="txtParameterValue" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>UOM</label>
+                            <input type="text" id="txtUom" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Testing Site</label>
+                            <input type="text" id="txtSite" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="d-block">&nbsp;</label>
+                            <button id="addTrialInput" type="button" class="btn btn-primary w-100"> <i class="fas fa-pen me-2"></i> Input Raw Data (Trial)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Lower Specs Limit</label>
+                            <input type="text" id="txtLowerSpecsLimit" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Upper Specs Limit</label>
+                            <input type="text" id="txtUpperSpecsLimit" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Specs Judgement</label>
+                            <input type="text" id="txtSpecsJudgement" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Lower Control Limit</label>
+                            <input type="text" id="txtLowerControlLimit" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Upper Control Limit</label>
+                            <input type="text" id="txtUpperControlLimit" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Control Judgement</label>
+                            <input type="text" id="txtControlJudgement" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="d-block">&nbsp;</label>
+                            <div class="row">
+                                <div class="col-md-6 pr-1">
+                                    <button type="button" class="btn btn-warning w-100" id="btnPreSubmit"> <i class="fas fa-paper-plane me-1"></i> Pre-Submit</button>
+                                </div>
+                                <div class="col-md-6 pl-1">
+                                    <button type="button" class="btn btn-success w-100" id="btnSubmit"> <i class="fas fa-save me-1"></i> Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-gray-light border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Pre-Submit Data</h6>
+                <button type="button" class="btn btn-tool ml-auto" data-toggle="collapse" data-target="#preSubmitDataInfo" aria-expanded="true">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+
+            <div class="card-body px-4 py-3" id="preSubmitDataInfo">
+                <div class="row">
+                    <div class="table-responsive">
+                        <table id="preSubmitDataTable" class="table table-hover align-middle w-100">
+                            <thead class="text-dark">
+                                <tr>
+                                    <th>Parameter Name</th>
+                                    <th>Parameter Value</th>
+                                    <th>UOM</th>
+                                    <th>Site</th>
+                                    <th>Lower Specs</th>
+                                    <th>Upper Specs</th>
+                                    <th>Specs Judgement</th>
+                                    <th>Lower Control</th>
+                                    <th>Upper Control</th>
+                                    <th>Control Judgement</th>
+                                    <th>EDCSPC</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="trialInputModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Trial Details</h5>
+                <button type="button" id="close-trialInput" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Raw Data (Trial) <span class="text-danger">*</span></label>
+                        <input type="text" id="txtRawDataTrial" class="form-control" placeholder="Enter Raw Data (Trial)">
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <label>Added Trials</label>
+                    <ul id="trialValuesList" class="list-group mb-3" style="max-height: 150px; overflow-y: auto;"></ul>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="add-trialInput" class="btn btn-outline-secondary px-4">
+                    Add
+                </button>
+                <button type="button" id="proceed-trialInput" class="btn btn-primary px-4">
+                    Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="~/Content/Main/smallToolEntry.css" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+          getMaterial: '@Url.Action("GetMaterial", "Material", new { area = "Maintenance" })',
+          getMaterialParameter: '@Url.Action("GetMaterialParameterById", "Material", new { area = "Maintenance" })',
+          createToolEntry: '@Url.Action("CreateToolEntry", "SmallToolEntry", new { area = "Main" })',
+           createSmallToolStaging: '@Url.Action("CreateSmallToolStaging", "SmallToolEntry", new { area = "Main" })',
+           submitTrial: '@Url.Action("CreateTrial", "SmallToolEntry", new { area = "Main" })',
+          getAnalysis: '@Url.Action("GetAnalysis", "Analysis", new { area = "Maintenance" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Main/smallToolEntry.js"></script>
+}

@@ -1,0 +1,130 @@
+/* Timeline Styles */
+.timeline-wrapper {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, #e9ecef, #dee2e6);
+    border-radius: 2px;
+}
+
+.timeline-items {
+    position: relative;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+    padding-left: 70px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: 21px;
+    top: 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    z-index: 1;
+}
+
+.timeline-content {
+    position: relative;
+}
+
+.timeline-card {
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.timeline-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.version-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-list li {
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.feature-list li i {
+    width: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .timeline-line {
+        left: 15px;
+    }
+    
+    .timeline-item {
+        padding-left: 45px;
+    }
+    
+    .timeline-dot {
+        left: 6px;
+        width: 18px;
+        height: 18px;
+    }
+    
+    .timeline-card .card-header .row {
+        text-align: left !important;
+    }
+    
+    .timeline-card .card-header .col-md-6:last-child {
+        text-align: left !important;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Animation for timeline items */
+.timeline-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0.1s; }
+.timeline-item:nth-child(2) { animation-delay: 0.2s; }
+.timeline-item:nth-child(3) { animation-delay: 0.3s; }
+.timeline-item:nth-child(4) { animation-delay: 0.4s; }
+.timeline-item:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% { 
+        box-shadow: 0 0 0 0 rgba(0,123,255,0.4); 
+    }
+    70% { 
+        box-shadow: 0 0 0 10px rgba(0,123,255,0); 
+    }
+    100% { 
+        box-shadow: 0 0 0 0 rgba(0,123,255,0); 
+    }
+}

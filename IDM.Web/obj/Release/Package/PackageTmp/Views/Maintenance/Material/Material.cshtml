@@ -1,0 +1,216 @@
+﻿@{
+    ViewBag.Title = "Material";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right" id="addMaterial">
+            <i class="fas fa-plus"></i> Add Material
+        </button>
+    </div>
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="materialTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>MaterialNo</th>
+                        <th>MaterialName</th>
+                        <th>Manufacturer</th>
+                        <th>Supplier</th>
+                        <th>Area</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="materialModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Material Details</h5>
+                <button type="button" id="close-material" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Material No. <span class="text-danger">*</span></label>
+                        <input type="text" id="txtMaterialNo" class="form-control" placeholder="Enter Material No.">
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Material Name<span class="text-danger">*</span></label>
+                        <input type="text" id="txtMaterialName" class="form-control" placeholder="Enter Material Name">
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Manufacturer <span class="text-danger">*</span></label>
+                        <select id="ddlManufacturer" class="form-control">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Supplier <span class="text-danger">*</span></label>
+                        <select id="ddlSuplier" class="form-control form-control">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Area <span class="text-danger">*</span></label>
+                        <select id="ddlArea" class="form-control form-control">
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-material" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-material" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="materialParameterModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Material Parameter Details</h5>
+                <button type="button" id="close-material" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Parameter Name <span class="text-danger">*</span></label>
+                            <select id="ddlParameter" class="form-control">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Uom <span class="text-danger">*</span></label>
+                            <select id="ddlUom" class="form-control">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="ddlSite">Testing Site <span class="text-danger">*</span></label>
+                        <div class="d-flex align-items-center">
+                            <select id="ddlSite" class="form-control" style="flex: 1;">
+                                <!-- options -->
+                            </select>
+                            <div class="form-check ml-3 mb-0">
+                                <input type="checkbox" id="chkIsEdspc" class="form-check-input" />
+                                <label for="chkIsEdspc" class="form-check-label mb-0 font-weight-bold">IsEdcspc </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Lower Specs Limit </label>
+                            <input type="text" id="txtLowerSpecsLimit" class="form-control" placeholder="Enter Lower Specs Limit">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Upper Specs Limit </label>
+                            <input type="text" id="txtUpperSpecsLimit" class="form-control" placeholder="Enter Upper Specs Limit">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Lower Control Limit </label>
+                            <input type="text" id="txtLowerControlLimit" class="form-control" placeholder="Enter Lower Control Limit">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Upper Control Limit </label>
+                            <input type="text" id="txtUpperControlLimit" class="form-control" placeholder="Enter Upper Control Limit">
+                        </div>
+                    </div>
+
+
+                    <div class="table-responsive">
+                        <table id="materialParameterTable" class="table table-hover align-middle w-100">
+                            <thead class="text-dark">
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Uom</th>
+                                    <th>Site</th>
+                                    <th>IsEdcspc</th>
+                                    <th>LowerSpecs</th>
+                                    <th>UpperSpecs</th>
+                                    <th>LowerControl</th>
+                                    <th>UpperControl</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+
+
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-materialParameter" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-materialParameter" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+            getMaterial: '@Url.Action("GetMaterial", "Material", new { area = "Maintenance" })',
+            addMaterial: '@Url.Action("Create", "Material", new { area = "Maintenance" })',
+            editMaterial: '@Url.Action("Edit", "Material", new { area = "Maintenance" })',
+            deleteMaterial: '@Url.Action("Delete", "Material", new { area = "Maintenance" })',
+
+            getMaterialParameter: '@Url.Action("GetMaterialParameterById", "Material", new { area = "Maintenance" })',
+            addMaterialParameter: '@Url.Action("CreateMaterialParameter", "Material", new { area = "Maintenance" })',
+            editMaterialParameter: '@Url.Action("EditMaterialParameter", "Material", new { area = "Maintenance" })',
+            deleteMaterialParameter: '@Url.Action("DeleteMaterialParameter", "Material", new { area = "Maintenance" })',
+
+            getManufacturer: '@Url.Action("GetManufacturer", "Manufacturer", new { area = "Maintenance" })',
+            getSupplier: '@Url.Action("GetSupplier", "Supplier", new { area = "Maintenance" })',
+            getArea: '@Url.Action("GetArea", "Area", new { area = "Maintenance" })',
+            getParameter: '@Url.Action("GetParameter", "Parameter", new { area = "Maintenance" })',
+            getSite: '@Url.Action("GetSite", "TestingSite", new { area = "Maintenance" })',
+            getUom: '@Url.Action("GetUom", "Uom", new { area = "Maintenance" })'
+        };
+    </script>
+
+    <script src="~/Scripts/Maintenance/material.js"></script>
+}

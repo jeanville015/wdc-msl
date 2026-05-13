@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Tool Entry Items";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="toolEntryItemsTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Amethyst Job</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" style="max-width: 95vw;">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">View Details</h5>
+                <button type="button" id="close-view" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="card-body px-4 py-3">
+                <div class="table-responsive">
+                    <table id="byAmethystTable" class="table table-hover align-middle w-100">
+                        <thead class="text-dark">
+                            <tr>
+                                <th>Amethyst Job</th>
+                                <th>Analysis</th>
+                                <th>Analysis Trial</th>
+                                <th>Tool</th>
+                                <th>Date Analyzed</th>
+                                <th>Analyzed By</th>
+                                <th>Date Reviewed</th>
+                                <th>Reviewed By</th>
+                                <th>Customer</th>
+                                <th>Image</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="close-view-btn" class="btn btn-outline-secondary px-4">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="detailedModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" style="max-width: 95vw;">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">View Details</h5>
+                <button type="button" id="close-view" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="card-body px-4 py-3">
+                <div class="table-responsive">
+                    <table id="byAmethystTable" class="table table-hover align-middle w-100">
+                        <thead class="text-dark">
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="close-view-detailed-btn" class="btn btn-outline-secondary px-4">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+           getAllToolEntryItems: '@Url.Action("GetAllAsyncForApprove", "ToolEntryItems", new { area = "Main" })',
+           getAllAsyncByAmethystJob: '@Url.Action("GetAllAsyncByAmethystJob", "ToolEntryItems", new { area = "Main" })',
+           getData: '@Url.Action("GetData", "ToolEntryItems", new { area = "Main" })',
+           getToolTypeByToolName: '@Url.Action("GetByToolNameAsync", "Tool", new { area = "Maintenance" })',
+           getToolTypeByIdAsync: '@Url.Action("GetByIdAsync", "ToolType", new { area = "Maintenance" })',
+           getByToolTypeAndAnalysisAsync: '@Url.Action("GetByToolTypeAndAnalysisAsync", "Analysis", new { area = "Maintenance" })',
+           getByAnalysisAsync: '@Url.Action("GetByAnalysisAsync", "Analysis", new { area = "Maintenance" })',
+           getByJobAndAnalysisAsync: '@Url.Action("GetByJobAndAnalysisAsync", "ToolEntryItems", new { area = "Main" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Main/toolEntryItems.js"></script>
+}

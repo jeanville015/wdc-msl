@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "Account";
+} 
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right" id="addAccount">
+            <i class="fas fa-plus"></i> Add Account
+        </button>
+    </div>
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="accountTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Account</th>
+                        <th>Employee Name</th>
+                        <th>Account Role</th>
+                        <th>Group</th>
+                        <th>Analysis</th>
+                        <th>Last Login TS</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="accountModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Account Details</h5>
+                <button type="button" id="close-account" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Account <span class="text-danger">*</span></label>
+                        <input type="text" id="txtAccount" class="form-control" placeholder="Enter Account">
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Role <span class="text-danger">*</span></label>
+                        <select id="ddlRole" class="form-control form-control">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Group <span class="text-danger">*</span></label>
+                        <select id="ddlGroup" class="form-control form-control">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Hidden field: stores selected AnalysisIds for form POST -->
+                <input type="hidden" id="hdnAnalysisIds" name="AnalysisIds" />
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Analysis <span class="text-danger">*</span></label>
+                        <select id="selectAnalysis"
+                                name="AnalysisIds"
+                                class="form-control form-control"
+                                multiple="multiple"
+                                style="width: 100%;">
+                            <!-- Options populated dynamically by loadAnalysis() -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-account" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-account" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+            getAccount: '@Url.Action("GetAccount", "Account", new { area = "User" })',
+            addAccount: '@Url.Action("Create", "Account", new { area = "User" })',
+            editAccount: '@Url.Action("Edit", "Account", new { area = "User" })',
+            deleteAccount: '@Url.Action("Delete", "Account", new { area = "User" })',
+            getRoles: '@Url.Action("GetRole", "Role", new { area = "User" })',
+            getGroups: '@Url.Action("GetGroup", "Account", new { area = "User" })',
+            getAnalysis: '@Url.Action("GetAnalysis", "Analysis", new { area = "User" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/User/account.js"></script>
+}

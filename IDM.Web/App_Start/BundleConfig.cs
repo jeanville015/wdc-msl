@@ -1,0 +1,53 @@
+using System.Web;
+using System.Web.Optimization;
+
+namespace IDM.Web
+{
+    public class BundleConfig
+    {
+        // For more information on bundling, visit https://go.microsoft.com/fwlink/?LinkId=301862
+        public static void RegisterBundles(BundleCollection bundles)
+        {
+            bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
+                        "~/Scripts/jquery-{version}.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
+                        "~/Scripts/jquery.validate*"));
+
+            // Use the development version of Modernizr to develop with and learn from. Then, when you're
+            // ready for production, use the build tool at https://modernizr.com to pick only the tests you need.
+            bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
+                        "~/Scripts/modernizr-*"));
+
+            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
+                      "~/Scripts/bootstrap.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/adminlte").Include(
+                "~/Content/plugins/jquery/jquery.min.js",
+                "~/Content/plugins/select2/js/select2.full.min.js",
+                "~/Content/plugins/bootstrap/js/bootstrap.bundle.min.js",
+                "~/Content/plugins/datatables/jquery.dataTables.min.js",
+                "~/Content/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js",
+                "~/Content/plugins/toastr/toastr.min.js",
+                "~/Content/plugins/sweetalert2/sweetalert2.all.min.js",
+                "~/Content/dist/js/adminlte.min.js"
+            ));
+
+            bundles.Add(new StyleBundle("~/Content/adminlte").Include(
+                "~/Content/plugins/select2/css/select2.min.css",
+                "~/Content/plugins/select2/css/select2-overrides.css",
+                "~/Content/plugins/fontawesome-free/css/all.min.css",
+                "~/Content/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css",
+                "~/Content/plugins/toastr/toastr.min.css",
+                "~/Content/plugins/sweetalert2/sweetalert2.min.css",
+                "~/Content/dist/css/adminlte.min.css"
+            ));
+
+            bundles.Add(new StyleBundle("~/Content/siteCss").Include(
+                      "~/Content/site.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/siteJs").Include(
+                     "~/Scripts/site.js"));
+        }
+    }
+}

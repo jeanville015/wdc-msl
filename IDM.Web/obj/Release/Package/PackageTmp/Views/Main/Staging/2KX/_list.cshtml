@@ -1,0 +1,269 @@
+﻿@using IDM.DTO.Main.View;
+@using System.Collections.Generic
+@using System.Linq
+
+@model DynamicStagingTabsView
+
+@if (Model != null)
+{
+    <!-- Static Header Container -->
+    <div class="card bg-light mb-3">
+        <div class="card-body py-2">
+            <!-- 'row' naturally aligns left; 'no-gutters' keeps them tight -->
+            <div class="row no-gutters">
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Job</label><span class="text-dark">@Model.AmethystJob</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Analysis</label><span class="text-dark">@Model.Analysis</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Trial</label><span class="text-dark">@Model.AnalysisTrial</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Lot #</label><span class="text-dark">@Model.LotNumber</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Analyzed Date</label><span class="text-dark">@Model.DateAnalyzed</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Analyzed By</label><span class="text-dark">@Model.AnalyzedBy</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Reviewed Date</label><span class="text-dark">@Model.DateReviewed</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Reviewed By</label><span class="text-dark">@Model.ReviewedBy</span></div>
+                <div class="col-auto"><label class="text-muted small font-weight-bold d-block mb-0">Tool</label><span class="text-dark">@Model.Tool</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Logic -->
+    <ul class="nav nav-tabs" id="sampleTabs">
+        @foreach (var seq in Model.GroupedData.Keys)
+        {
+            var isFirst = seq == Model.GroupedData.Keys.First();
+            <li class="nav-item">
+                <a class="nav-link @(isFirst ? "active" : "")" data-toggle="tab" href="#pane-@seq">Seq: @seq</a>
+            </li>
+        }
+    </ul>
+
+    <div class="tab-content border-left border-right border-bottom p-3">
+        @foreach (var group in Model.GroupedData)
+        {
+            var isFirst = group.Key == Model.GroupedData.Keys.First();
+            <div class="tab-pane fade @(isFirst ? "show active" : "")" id="pane-@group.Key">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm text-nowrap">
+                        <thead class="thead-light">
+                            <tr>
+                                @foreach (var h in Model.DynamicHeaders)
+                                {
+                                    <th>@h</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in group.Value)
+                            {
+                                <tr>
+                                    @foreach (var h in Model.DynamicHeaders)
+                                    {
+                                        var cellValue = row.AdditionalProperties.ContainsKey(h) ? row.AdditionalProperties[h]?.ToString() : "";
+
+                                        <td>
+                                            @if (h.Equals("Image", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cellValue))
+                                            {
+                                                <!-- Dynamic Thumbnail Injection -->
+                                                <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">
+                                                    <!-- Loading Spinner -->
+                                                    <div class="img-loader">
+                                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                                    </div>
+                                                    <img src="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                                     class="img-thumbnail img-trigger d-none"
+                                                     style="height: 80px; width:auto; cursor: pointer; display:block;"
+                                                     data-fullurl="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                                     alt="Preview" 
+                                                     onload="imageLoaded(this)" />
+                                                </div>
+                                                
+                                            }
+                                            else if (h.Equals("Annotation", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cellValue))
+                                            {
+                                                var area = row.AdditionalProperties.ContainsKey("Area") ? row.AdditionalProperties["Area"] : "";
+                                                var subArea = row.AdditionalProperties.ContainsKey("SubArea") ? row.AdditionalProperties["SubArea"] : "";
+                                                <!-- Dynamic Thumbnail Injection -->
+                                                <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">
+                                                    <!-- Loading Spinner -->
+                                                    <div class="img-loader">
+                                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                                    </div>
+                                                    <img src="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                                         class="img-thumbnail preview-w-details-trigger d-none"
+                                                         style="height: 80px; width:auto; cursor: pointer; display:block;"
+                                                         data-path="@cellValue"
+                                                         data-job="@Model.AmethystJob"
+                                                         data-analysis="@Model.Analysis"
+                                                         data-trial="@Model.AnalysisTrial"
+                                                         data-area="@area"
+                                                         data-subarea="@subArea"
+                                                         alt="Preview" 
+                                                         onload="imageLoaded(this)"
+                                                         onerror="imageLoaded(this)" />
+                                                </div> 
+                                            }
+                                            else
+                                            {
+                                                @cellValue
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Reusable Large Modal -->
+<div class="modal fade" id="previewModal" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Preview</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+            <div class="modal-body text-center">
+                <img id="largeImage" src="" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal with details/gridview -->
+<div class="modal fade" id="sideBySideModal" tabindex="-1"  role="dialog">
+    <div class="modal-dialog modal-xl"  role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">DEFECT DETAILS</h4>
+                <div class="pull-right">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <!-- flex-nowrap ensures they NEVER stack/wrap below each other -->
+                <div class="row g-0" style="display: flex; flex-wrap: nowrap; align-items: stretch;">
+
+                    <!-- LEFT: Image Column - flex-grow allows it to take remaining space -->
+                    <div class="col-md-7 bg-light d-flex align-items-center justify-content-center border-end"
+                         style="min-height: 600px; overflow: hidden; flex: 1;">
+                        <img id="modalImageLeft" src="" class="img-responsive center-block" alt="Loading Image..."
+                             style="max-width: 100%; max-height: 600px; object-fit: contain;" />
+                    </div>
+
+                    <!-- RIGHT: Table Column -->
+                    <div class="table-column-container p-4">
+                        <h5 class="mb-3">Analysis Details</h5>
+                        <div class="analysis-table-wrapper">
+                            <div id="modalTableRightBody">
+                                <!-- PartialView (with <table>) lands here -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        //--------THESE LINES OF CODES SUPPORTS MULT MODAL ANIMATIONS AND POSITIONING-----------------
+        $('#previewModal').on('show.bs.modal', function () {
+            // Increase z-index if another modal is already open
+            var animatetime = 0;
+            setTimeout(function () {
+                $('#previewModal').css('z-index', 1060);
+                $('.modal-backdrop').not('.stacked').css('z-index', 1059).addClass('stacked');
+            }, animatetime);
+        });
+        $('#previewModal').on('hidden.bs.modal', function () {
+            // 1. Remove the leftover backdrop if it exists
+            $('.modal-backdrop').last().remove();
+
+            // 2. If the first modal is still open, re-add 'modal-open' to the body
+            // This prevents the screen from being "frozen"
+            if ($('#sideBySideModal').hasClass('in') || $('.modal.in').length > 0) {
+                $('body').addClass('modal-open');
+            }
+        });
+        //--------------------------------------------------------------------------------------------
+
+        $('.img-trigger').on('click', function () {
+            var src = $(this).data('fullurl');
+            $('#largeImage').attr('src', src);
+            $('#previewModal').modal('show');
+        });
+
+        $('.preview-w-details-trigger').on('click', function () {
+            // 1. Extract parameters from the clicked element
+            const path = $(this).data('path');
+            const params = {
+                table: 'DATA_STAGING_DEFECT', //hardcode origin of DATA_STAGING_DEFECT 
+                amethystJob: $(this).data('job'),
+                analysis: $(this).data('analysis'),
+                analysisTrial: $(this).data('trial'),
+                area: $(this).data('area'),
+                subArea: $(this).data('subarea')
+            };
+
+            // 2. Execute specific methods
+            LoadImage(path);
+            LoadDetails(params);
+
+            // 3. Show Modal
+            $('#sideBySideModal').modal('show');
+        });
+
+    });
+
+    // Method 1: Get image and display on LEFT
+    function LoadImage(filePath) {
+        const url = '@Url.Action("Preview", "Staging")?fullPath=' + encodeURIComponent(filePath);
+        $('#modalImageLeft').attr('src', url);
+    }
+
+    // Method 2: Get table data and display on RIGHT
+    function LoadDetails(p) {
+        $.ajax({
+            url: '@Url.Action("GetDataStagingDefectAsync", "Staging")', // Update to your controller
+            type: 'GET',
+            data: p, // Sends a, b, c, d, e as query params
+            beforeSend: function () {
+                // Show overlay before the request starts
+                $("#loadingOverlay").fadeIn();
+            },
+            success: function (response) { 
+                // Populate the div with the returned HTML (Partial View)
+                $("#modalTableRightBody").html(response);
+            },
+            error: function () {
+                $("#modalTableRightBody").html('<tr><td colspan="2" class="text-danger">Error loading details.</td></tr>');
+            },
+            complete: function () {
+                // Hide overlay after request finishes (success or error)
+                $("#loadingOverlay").fadeOut();
+            }
+        });
+    }
+
+    function imageLoaded(img) {
+        // Hide the loader (the sibling div)
+        const loader = img.parentElement.querySelector('.img-loader');
+        if (loader) loader.style.display = 'none';
+
+        // Show the image
+        img.classList.remove('d-none');
+    }
+
+</script>

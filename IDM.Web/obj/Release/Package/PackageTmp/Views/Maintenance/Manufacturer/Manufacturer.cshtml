@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Manufacturer";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right" id="addManufacturer">
+            <i class="fas fa-plus"></i> Add Manufacturer
+        </button>
+    </div>
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="manufacturerTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Manufacturer</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="manufacturerModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Manufacturer Details</h5>
+                <button type="button" id="close-manufacturer" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Manufacturer <span class="text-danger">*</span></label>
+                        <input type="text" id="txtManufacturer" class="form-control" placeholder="Enter Manufacturer">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-manufacturer" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-manufacturer" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+            getManufacturer: '@Url.Action("GetManufacturer", "Manufacturer", new { area = "Maintenance" })',
+            addManufacturer: '@Url.Action("Create", "Manufacturer", new { area = "Maintenance" })',
+            editManufacturer: '@Url.Action("Edit", "Manufacturer", new { area = "Maintenance" })',
+            deleteManufacturer: '@Url.Action("Delete", "Manufacturer", new { area = "Maintenance" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Maintenance/manufacturer.js"></script>
+}

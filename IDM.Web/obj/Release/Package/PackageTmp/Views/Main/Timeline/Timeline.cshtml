@@ -1,0 +1,39 @@
+
+@{
+    ViewBag.Title = "Timeline";
+}
+
+@section Styles {
+    <link href="~/Content/Main/timeline.css" rel="stylesheet" type="text/css" />
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header-box">
+                <h4 class="page-header">Application History and Timeline</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <!-- Timeline Container -->
+            <div class="timeline-wrapper">
+                <!-- Timeline Line -->
+                <div class="timeline-line"></div>
+                
+                <!-- Timeline Items - Populated by JavaScript -->
+                <div class="timeline-items">
+                    <!-- Timeline items will be dynamically added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/Main/timeline.js"></script>
+}
+
+

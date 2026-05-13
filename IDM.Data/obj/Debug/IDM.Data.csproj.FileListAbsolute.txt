@@ -1,0 +1,16 @@
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\IDM.Data.dll.config
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\IDM.Data.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\IDM.Data.pdb
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\Dapper.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\System.Threading.Tasks.Extensions.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\Dapper.xml
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\bin\Debug\System.Threading.Tasks.Extensions.xml
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\obj\Debug\IDM.Data.csproj.AssemblyReference.cache
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\obj\Debug\IDM.Data.csproj.CoreCompileInputs.cache
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\obj\Debug\IDM.Data.csproj.Up2Date
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\obj\Debug\IDM.Data.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Data\obj\Debug\IDM.Data.pdb

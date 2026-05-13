@@ -1,0 +1,6 @@
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Model\bin\Release\IDM.Model.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Model\bin\Release\IDM.Model.pdb
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Model\obj\Release\IDM.Model.csproj.AssemblyReference.cache
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Model\obj\Release\IDM.Model.csproj.CoreCompileInputs.cache
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Model\obj\Release\IDM.Model.dll
+C:\WORK_FILES\REPOS\MSL\Dev\IDM.Model\obj\Release\IDM.Model.pdb
