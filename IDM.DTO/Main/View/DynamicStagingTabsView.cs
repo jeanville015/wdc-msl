@@ -24,5 +24,6 @@ namespace IDM.DTO.Main.View
 
         // Grouped data for the Tabs
         public Dictionary<string, List<DynamicStagingDTO>> GroupedData { get; set; }
+        public Dictionary<string, string> TabLabels { get; set; }
     }
 }

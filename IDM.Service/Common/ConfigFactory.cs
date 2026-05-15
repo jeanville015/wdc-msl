@@ -24,7 +24,9 @@ namespace IDM.Service.Common.Service
                 SMTPPort = ConfigurationManager.AppSettings["SMTPPort"],
                 EmailSender = ConfigurationManager.AppSettings["EmailSender"],
                 DefaultEmailRecipients = ConfigurationManager.AppSettings["DefaultEmailRecipients"],
-                Website = ConfigurationManager.AppSettings["Website"]
+                Website = ConfigurationManager.AppSettings["Website"],
+                BdpUploadCommonDirectory = ConfigurationManager.AppSettings["BdpUploadCommonDirectory"],
+                BdpUploadCommonURL = ConfigurationManager.AppSettings["BdpUploadCommonURL"]
             };
         }
     }

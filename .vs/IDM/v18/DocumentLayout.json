@@ -3,20 +3,16 @@
   "WorkspaceRootPath": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|c:\\work_files\\repos\\msl\\dev\\idm.web\\controllers\\main\\stagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\controllers\\main\\stagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F394A620-3DAD-471B-A2BA-4448864A7E6F}|IDM.Repository\\IDM.Repository.csproj|c:\\work_files\\repos\\msl\\dev\\idm.repository\\main\\repository\\dynamicstagingrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F394A620-3DAD-471B-A2BA-4448864A7E6F}|IDM.Repository\\IDM.Repository.csproj|solutionrelative:idm.repository\\main\\repository\\dynamicstagingrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7EDC5313-093C-4907-9A5D-792DD149F384}|IDM.Service\\IDM.Service.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.service\\main\\service\\dynamicstagingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7EDC5313-093C-4907-9A5D-792DD149F384}|IDM.Service\\IDM.Service.csproj|solutionrelative:idm.service\\main\\service\\dynamicstagingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\views\\main\\staging\\2kx\\_list.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\views\\main\\staging\\2kx\\_list.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+      "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\controllers\\main\\stagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\controllers\\main\\stagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\scripts\\main\\staging.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
@@ -27,16 +23,20 @@
       "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\views\\main\\staging\\staging.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\controllers\\user\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\controllers\\user\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\controllers\\user\\rolecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\controllers\\user\\rolecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.web\\views\\main\\staging\\2kx\\details\\_list.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{1A254087-B0EA-4048-A90D-3039F7ADDB51}|IDM.Web\\IDM.Web.csproj|solutionrelative:idm.web\\views\\main\\staging\\2kx\\details\\_list.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F394A620-3DAD-471B-A2BA-4448864A7E6F}|IDM.Repository\\IDM.Repository.csproj|C:\\WORK_FILES\\REPOS\\MSL\\Dev\\idm.repository\\main\\repository\\pendingdatarepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -66,57 +66,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "_list.cshtml",
-              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\2KX\\_list.cshtml",
-              "RelativeDocumentMoniker": "IDM.Web\\Views\\Main\\Staging\\2KX\\_list.cshtml",
-              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\2KX\\_list.cshtml",
-              "RelativeToolTip": "IDM.Web\\Views\\Main\\Staging\\2KX\\_list.cshtml",
-              "ViewState": "AgIAADYAAAAAAAAAAAAAADsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-12T07:22:10.321Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Web.config",
-              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Web.config",
-              "RelativeDocumentMoniker": "IDM.Web\\Web.config",
-              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Web.config",
-              "RelativeToolTip": "IDM.Web\\Web.config",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAACQAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2026-05-12T07:16:11.016Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "staging.js",
-              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Scripts\\Main\\staging.js",
-              "RelativeDocumentMoniker": "IDM.Web\\Scripts\\Main\\staging.js",
-              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Scripts\\Main\\staging.js",
-              "RelativeToolTip": "IDM.Web\\Scripts\\Main\\staging.js",
-              "ViewState": "AgIAABgAAAAAAAAAAAAAACkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-05-11T00:15:59.585Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Staging.cshtml",
-              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
-              "RelativeDocumentMoniker": "IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
-              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
-              "RelativeToolTip": "IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAEwB0AAAAsAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-11T00:06:23.068Z"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -125,23 +76,84 @@
               "RelativeDocumentMoniker": "IDM.Service\\Main\\Service\\DynamicStagingService.cs",
               "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Service\\Main\\Service\\DynamicStagingService.cs",
               "RelativeToolTip": "IDM.Service\\Main\\Service\\DynamicStagingService.cs",
-              "ViewState": "AgIAAD4AAAAAAAAAAAAMwE0AAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAADoAAAAAAAAAAAAMwE4AAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-07T07:03:36.292Z",
+              "WhenOpened": "2026-05-15T06:33:55.99Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "DynamicStagingRepository.cs",
+              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Repository\\Main\\Repository\\DynamicStagingRepository.cs",
+              "RelativeDocumentMoniker": "IDM.Repository\\Main\\Repository\\DynamicStagingRepository.cs",
+              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Repository\\Main\\Repository\\DynamicStagingRepository.cs",
+              "RelativeToolTip": "IDM.Repository\\Main\\Repository\\DynamicStagingRepository.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAUwDAAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-15T06:33:56.034Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "LoginController.cs",
+              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Controllers\\LoginController.cs",
+              "RelativeDocumentMoniker": "IDM.Web\\Controllers\\LoginController.cs",
+              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Controllers\\LoginController.cs",
+              "RelativeToolTip": "IDM.Web\\Controllers\\LoginController.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAAAACYAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-15T05:30:45.064Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "IDM.Web\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "IDM.Web\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAABQAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-15T05:29:06.344Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "StagingController.cs",
               "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Controllers\\Main\\StagingController.cs",
               "RelativeDocumentMoniker": "IDM.Web\\Controllers\\Main\\StagingController.cs",
               "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Controllers\\Main\\StagingController.cs",
               "RelativeToolTip": "IDM.Web\\Controllers\\Main\\StagingController.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAnwFcAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAADkAAAAAAAAAAAAuwE8AAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-07T05:51:30.67Z",
+              "WhenOpened": "2026-05-15T05:11:54.496Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "staging.js",
+              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Scripts\\Main\\staging.js",
+              "RelativeDocumentMoniker": "IDM.Web\\Scripts\\Main\\staging.js",
+              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Scripts\\Main\\staging.js",
+              "RelativeToolTip": "IDM.Web\\Scripts\\Main\\staging.js",
+              "ViewState": "AgIAALsAAAAAAAAAAAAAwNsAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-05-11T00:15:59.585Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Staging.cshtml",
+              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
+              "RelativeDocumentMoniker": "IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
+              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
+              "RelativeToolTip": "IDM.Web\\Views\\Main\\Staging\\Staging.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-11T00:06:23.068Z"
             },
             {
               "$type": "Document",
@@ -157,19 +169,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "_list.cshtml",
-              "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\2KX\\Details\\_list.cshtml",
-              "RelativeDocumentMoniker": "IDM.Web\\Views\\Main\\Staging\\2KX\\Details\\_list.cshtml",
-              "ToolTip": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Views\\Main\\Staging\\2KX\\Details\\_list.cshtml",
-              "RelativeToolTip": "IDM.Web\\Views\\Main\\Staging\\2KX\\Details\\_list.cshtml",
-              "ViewState": "AgIAABIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-07T07:27:51.159Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "AccountController.cs",
               "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Controllers\\User\\AccountController.cs",
               "RelativeDocumentMoniker": "IDM.Web\\Controllers\\User\\AccountController.cs",
@@ -182,7 +182,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "RoleController.cs",
               "DocumentMoniker": "C:\\WORK_FILES\\REPOS\\MSL\\Dev\\IDM.Web\\Controllers\\User\\RoleController.cs",
               "RelativeDocumentMoniker": "IDM.Web\\Controllers\\User\\RoleController.cs",

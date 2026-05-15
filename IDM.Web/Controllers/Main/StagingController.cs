@@ -1,6 +1,7 @@
 ﻿using IDM.DTO.Main.View;
 using IDM.Model.Common;
 using IDM.Model.Maintenance;
+using IDM.Service.Common.Interface;
 using IDM.Service.Main.Interface;
 using IDM.Service.Main.Service;
 using IDM.Service.Maintenance.Interface;
@@ -105,26 +106,38 @@ namespace IDM.Web.Controllers.Main
             // Define the specific dynamic columns you want to show
             var allowedDynamicColumns = new[] { "Area", "SubArea", "RawFileName", "Image", "Annotation" };
 
+            var grouped = data.GroupBy(x => x.AdditionalProperties.ContainsKey("SampleSequence")
+                    ? x.AdditionalProperties["SampleSequence"]?.ToString()
+                    : "Unknown")
+                  .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Build display labels separately — safe characters only in the key
+            var tabLabels = grouped.ToDictionary(
+                g => g.Key,
+                g => {
+                    var firstRow = g.Value.First();
+                    var seq = g.Key;
+                    var product = firstRow.AdditionalProperties.ContainsKey("Product") ? firstRow.AdditionalProperties["Product"]?.ToString() : "";
+                    var sliderSN = firstRow.AdditionalProperties.ContainsKey("SliderSN") ? firstRow.AdditionalProperties["SliderSN"]?.ToString() : "";
+                    return $"S{seq}_{product}_{sliderSN}";
+                }
+            );
+
             var dynamicStagingTabsView = new DynamicStagingTabsView
-            {
+            {   
                 AmethystJob = first.AmethystJob,
                 Analysis = first.Analysis,
                 // Extracting others from AdditionalProperties if they aren't core properties
                 AnalysisTrial = first.GetProperty("AnalysisTrial")?.ToString(),
                 LotNumber = first.GetProperty("LotNumber")?.ToString(),
                 DateAnalyzed = first.GetProperty("DateAnalyzed")?.ToString(),
-                AnalyzedBy = first.GetProperty("AnalyzedBy")?.ToString(),
+                AnalyzedBy = await _userService.GetUserNameAsync(first.GetProperty("AnalyzedBy")?.ToString()),
                 DateReviewed = first.GetProperty("DateReviewed")?.ToString(),
-                ReviewedBy = first.GetProperty("ReviewedBy")?.ToString(),
+                ReviewedBy = await _userService.GetUserNameAsync(first.GetProperty("ReviewedBy")?.ToString()),
                 Tool = first.GetProperty("Tool")?.ToString(),
-
-                DynamicHeaders = first.AdditionalProperties.Keys
-                                      .Where(k => allowedDynamicColumns.Contains(k)).ToList(),
-
-                GroupedData = data.GroupBy(x => x.AdditionalProperties.ContainsKey("SampleSequence")
-                                                   ? x.AdditionalProperties["SampleSequence"]?.ToString()
-                                                   : "Unknown")
-                                     .ToDictionary(g => g.Key, g => g.ToList())
+                DynamicHeaders = first.AdditionalProperties.Keys.Where(k => allowedDynamicColumns.Contains(k)).ToList(),
+                GroupedData = grouped,
+                TabLabels = tabLabels 
             };
 
             return PartialView("~/Views/Main/Staging/2KX/_list.cshtml", dynamicStagingTabsView); 

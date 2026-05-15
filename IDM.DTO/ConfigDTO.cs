@@ -14,5 +14,7 @@
         public string EmailSender { get; set; }
         public string DefaultEmailRecipients { get; set; }
         public string Website { get; set; }
+        public string BdpUploadCommonDirectory { get; set; }
+        public string BdpUploadCommonURL { get; set; }
     }
 }

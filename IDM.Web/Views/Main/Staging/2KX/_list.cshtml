@@ -29,8 +29,9 @@
         @foreach (var seq in Model.GroupedData.Keys)
         {
             var isFirst = seq == Model.GroupedData.Keys.First();
+            var label = Model.TabLabels.ContainsKey(seq) ? Model.TabLabels[seq] : seq;
             <li class="nav-item">
-                <a class="nav-link @(isFirst ? "active" : "")" data-toggle="tab" href="#pane-@seq">Seq: @seq</a>
+                <a class="nav-link @(isFirst ? "active" : "")" data-toggle="tab" href="#pane-@seq">@label</a>
             </li>
         }
     </ul>
@@ -68,13 +69,13 @@
                                                         <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                                     </div>
                                                     <img src="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
-                                                     class="img-thumbnail img-trigger d-none"
-                                                     style="height: 80px; width:auto; cursor: pointer; display:block;"
-                                                     data-fullurl="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
-                                                     alt="Preview" 
-                                                     onload="imageLoaded(this)" />
+                                                         class="img-thumbnail img-trigger d-none"
+                                                         style="height: 80px; width:auto; cursor: pointer; display:block;"
+                                                         data-fullurl="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                                         alt="Preview"
+                                                         onload="imageLoaded(this)" />
                                                 </div>
-                                                
+
                                             }
                                             else if (h.Equals("Annotation", StringComparison.OrdinalIgnoreCase))
                                             {
@@ -95,10 +96,10 @@
                                                          data-trial="@Model.AnalysisTrial"
                                                          data-area="@area"
                                                          data-subarea="@subArea"
-                                                         alt="Preview" 
+                                                         alt="Preview"
                                                          onload="imageLoaded(this)"
                                                          onerror="imageLoaded(this)" />
-                                                </div> 
+                                                </div>
                                             }
                                             else
                                             {

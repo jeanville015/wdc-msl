@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace IDM.Service.Main.Service
 {
     public class DynamicStagingService : IDynamicStagingService
@@ -325,7 +326,7 @@ namespace IDM.Service.Main.Service
             return true;
         }
 
-        public async Task<OperationResult> PrepareMQInputDataTable(DataTable dataTable, string sourceTable, string destinationTable, string userId)
+        public async Task<OperationResult> PrepareMQInputDataTable(DataTable dataTable, string sourceTable, string destinationTable, string userId, ConfigDTO configDTO)
         {
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "MQ Process Successful!" }; 
             try
@@ -333,7 +334,7 @@ namespace IDM.Service.Main.Service
                 //NOTE: object <DataTable> needed in MQ upload, 
                 //For dynamic fields identfying, just have the list of to be ignored fields and exclude them
 
-                var config = ConfigFactory.GetMqConfiguration(); 
+                //var config = ConfigFactory.GetMqConfiguration(); 
 
                 string primaryKeyIdLabel = FormatDataName(sourceTable);
                 string[] excludedFields = { primaryKeyIdLabel, "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
@@ -353,7 +354,7 @@ namespace IDM.Service.Main.Service
                     dataTable = dv.ToTable();
                 }
 
-                var uploaded = await MQUploadPreparationParameter(dataTable, config, destinationTable, userId);
+                var uploaded = await MQUploadPreparationParameter(dataTable, configDTO, destinationTable, userId);
                 if (!uploaded)
                 {
                     result.OperationStatus = false;
@@ -412,28 +413,30 @@ namespace IDM.Service.Main.Service
             setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
             if (setItemStatus==false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Upating of the item status was unsuccessful" }; }
 
+            var configDTO = ConfigFactory.GetMqConfiguration();
+
             //Note: MQ input execution---------------------------------------------------------------------------------------------------------
             //NOTE:DISABLE FOR AWHILE UNTIL THE MQSENDING LEVEL ERROR WAS RESOLVED
             //sample tables: DATA_STAGING_2KX, DATA_STAGING_100KX
             DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-            OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId);
+            OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId, configDTO);
             if (MainTableMQInput.OperationStatus == false) { return MainTableMQInput; }
 
             //sample tables: DATA_STAGING_DEFECT
             DataTable dataTableDefect = await GetDataStagingDefectDataTableAsync("DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial, null, null);
-            OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId);
+            OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId, configDTO);
             if (DefectTableMQInput.OperationStatus == false) { return DefectTableMQInput; }
             //---------------------------------------------------------------------------------------------------------------------------------
 
             //Note: File transfer and DB updating operations
-            OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial);
+            OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial, configDTO);
             if (executeBDPRequirementsProcess.OperationStatus == false) { return executeBDPRequirementsProcess; }
 
             //no errors on executed process above
             return result;
         }
 
-        public async Task<OperationResult> ExecuteBDPRequirementsProcess(string sourceTable, string amethystJob, string analysis, int analysisTrial)
+        public async Task<OperationResult> ExecuteBDPRequirementsProcess(string sourceTable, string amethystJob, string analysis, int analysisTrial, ConfigDTO configDTO)
         {
             var result = new OperationResult();
 
@@ -476,9 +479,9 @@ namespace IDM.Service.Main.Service
                     string job = GetVal("AmethystJob");
                     string seq = GetVal("SampleSequence");
 
-                    string commonDir = $@"\\pbt-op-onefs02.wdc.com\MSL\SEM3\BDP_Upload\{yearMonth}\{_analysis}\{sampleClass}\{sampleType}\{job}\{seq}\";
+                    string commonDir = $@"{configDTO.BdpUploadCommonDirectory}{yearMonth}\{_analysis}\{sampleClass}\{sampleType}\{job}\{seq}\";
                     string commonFileName = $"{GetVal("Product")}-{GetVal("WaferId")}-{GetVal("SliderSN")}-{GetVal("Area")}-{GetVal("SubArea")}-{GetVal("ToolType")}-{GetVal("Tool")}.tif";
-                    string urlBase = $"https://hdd-bdp-imgprxy.edge.wdc.com/2PNG/mho%2Fpho%2Fimages%2Fmnt%2FPHO_MSL%2FBDP_Upload%2F{yearMonth}%2F{_analysis}%2F{sampleClass}%2F{sampleType}%2F{job}%2F{seq}%2F";
+                    string urlBase = $"{configDTO.BdpUploadCommonURL}{yearMonth}%2F{_analysis}%2F{sampleClass}%2F{sampleType}%2F{job}%2F{seq}%2F";
 
                     // Image Object
                     string imagePath = GetVal("Image");
@@ -547,12 +550,12 @@ namespace IDM.Service.Main.Service
 
                     string GetPar(string key) => parent?.GetProperty(key)?.ToString() ?? "";
 
-                    string detailDir = $@"\\pbt-op-onefs02.wdc.com\MSL\SEM3\BDP_Upload\{yearMonth}\{GetDet("Analysis")}\{GetPar("SampleClass")}\{GetPar("SampleType")}\{GetDet("AmethystJob")}\{GetDet("SampleSequence")}\image_details\";
+                    string detailDir = $@"{configDTO.BdpUploadCommonDirectory}{yearMonth}\{GetDet("Analysis")}\{GetPar("SampleClass")}\{GetPar("SampleType")}\{GetDet("AmethystJob")}\{GetDet("SampleSequence")}\image_details\";
 
                     // Construct FileName using mix of Detail and Parent properties
                     string detailFileName = $"{GetPar("Product")}-{GetPar("WaferId")}-{GetPar("SliderSN")}-{GetDet("Area")}-{GetDet("SubArea")}-{GetDet("Defect")}-{GetDet("DefectGroup")}-Reference_Filename-Image_Type-{GetPar("ToolType")}-{GetPar("Tool")}.tif";
 
-                    string urlBase = $"https://hdd-bdp-imgprxy.edge.wdc.com/2PNG/mho%2Fpho%2Fimages%2Fmnt%2FPHO_MSL%2FBDP_Upload%2F{yearMonth}%2F{GetDet("Analysis")}%2F{GetPar("SampleClass")}%2F{GetPar("SampleType")}%2F{GetDet("AmethystJob")}%2F{GetDet("SampleSequence")}%2F";
+                    string urlBase = $"{configDTO.BdpUploadCommonURL}{yearMonth}%2F{GetDet("Analysis")}%2F{GetPar("SampleClass")}%2F{GetPar("SampleType")}%2F{GetDet("AmethystJob")}%2F{GetDet("SampleSequence")}%2F";
 
                     // SEM
                     string semPath = GetDet("SemImage");
