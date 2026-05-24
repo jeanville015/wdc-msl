@@ -20,6 +20,7 @@ namespace IDM.Service.Main.Interface
         Task<string> GetStatusAsync(string amethystJob, string analysis, int analysisTrial);
         Task<bool> MQUploadPreparationParameter(object table, ConfigDTO configDTO, string destinationTable, string approver);
         Task<OperationResult> SetApprovalStagingWImage(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string userId);
+        Task<OperationResult> PrepareMQInputDataTable(DataTable dataTable, string sourceTable, string destinationTable, string userId, ConfigDTO configDTO, string[] excludedFields);
 
     }
 }

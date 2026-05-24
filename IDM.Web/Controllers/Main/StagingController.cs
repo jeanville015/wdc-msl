@@ -1,4 +1,5 @@
-﻿using IDM.DTO.Main.View;
+﻿using IDM.DTO;
+using IDM.DTO.Main.View;
 using IDM.Model.Common;
 using IDM.Model.Maintenance;
 using IDM.Service.Common.Interface;
@@ -77,7 +78,28 @@ namespace IDM.Web.Controllers.Main
                 }, JsonRequestBehavior.AllowGet);
             }
             
-            var data = await _dynamicStagingService.GetByJobAndAnalysisAsync(table, amethystJob, analysis, analysisTrial);
+            List<DTO.Main.DynamicStagingDTO> data = (await _dynamicStagingService.GetByJobAndAnalysisAsync(table, amethystJob, analysis, analysisTrial)).ToList();
+
+            //-NOTE: will get the AD Fullname----------------------------------------------------------------//
+            foreach (var item in data)
+            {
+                var analyzedBy = item.GetProperty("AnalyzedBy")?.ToString();
+
+                if (!string.IsNullOrEmpty(analyzedBy))
+                {
+                    // Sanitize: remove "ad\" or "AD\" if present at the start
+                    if (analyzedBy.StartsWith(@"ad\", StringComparison.OrdinalIgnoreCase))
+                    {
+                        analyzedBy = analyzedBy.Substring(3);
+                    }
+
+                    string dataNewAnalyzedBy = await _userService.GetUserNameAsync(analyzedBy);
+
+                    item.SetProperty("AnalyzedBy", dataNewAnalyzedBy);
+                }
+            }
+            //-----------------------------------------------------------------------------------------------//
+
             return Json(new { 
                 redirect = false, 
                 data = data,
@@ -140,7 +162,7 @@ namespace IDM.Web.Controllers.Main
                 TabLabels = tabLabels 
             };
 
-            return PartialView("~/Views/Main/Staging/2KX/_list.cshtml", dynamicStagingTabsView); 
+            return PartialView("~/Views/Main/Staging/WImage/_list.cshtml", dynamicStagingTabsView); 
         }
 
         public async Task<ActionResult> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea)
@@ -170,7 +192,7 @@ namespace IDM.Web.Controllers.Main
                         .ToList()
             };
 
-            return PartialView("~/Views/Main/Staging/2KX/Details/_list.cshtml", dynamicStagingDetailsView);
+            return PartialView("~/Views/Main/Staging/WImage/Details/_list.cshtml", dynamicStagingDetailsView);
         }
 
         /// <summary>
@@ -183,7 +205,7 @@ namespace IDM.Web.Controllers.Main
         /// <param name="analysisTrial">1</param>
         /// <param name="analyzedBy">7327671</param>
         /// <param name="status">PASSED</param>
-        /// <param name="tableContent"></param>
+        /// <param name="tableContent"></param> 
         /// <returns></returns>
         public async Task<JsonResult> SetApproval(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent)
         {
@@ -207,11 +229,25 @@ namespace IDM.Web.Controllers.Main
                 }
                 else
                 {
-                    var uploaded = await _dynamicStagingService.MQUploadPreparationParameter(tableData, config, table, UserId);
-                    if (!uploaded)
-                    {
-                        return Json(new { success = false, message = "Error uploading on MQ", data = uploaded }, JsonRequestBehavior.AllowGet);
+
+                    //--NOTE: OLD CODE for MQUPLOAD-----------------------------------------------------------------------------------------------//
+                    //var uploaded = await _dynamicStagingService.MQUploadPreparationParameter(tableData, config, table, UserId);
+                    //if (!uploaded)
+                    //{
+                    //    return Json(new { success = false, message = "Error uploading on MQ", data = uploaded }, JsonRequestBehavior.AllowGet);
+                    //}
+                    //----------------------------------------------------------------------------------------------------------------------------//
+
+                    //--NOTE: NEW MQUPLOAD--------------------------------------------------------------------------------------------------------//
+                    DataTable dataTableMain = await _dynamicStagingService.GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+                    string[] excludedFields_Main = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
+                    OperationResult MainTableMQInput = await _dynamicStagingService.PrepareMQInputDataTable(dataTableMain, sourceTable, table, UserId, config, excludedFields_Main);
+                    if (MainTableMQInput.OperationStatus == false) 
+                    { 
+                        return Json(new { success = false, message = "Error uploading on MQ", data = MainTableMQInput.OperationStatus }, JsonRequestBehavior.AllowGet); 
                     }
+                    //----------------------------------------------------------------------------------------------------------------------------//
+
 
                     var customer = await _dynamicStagingService.GetCustomerAsync(amethystJob, analysis, analysisTrial);
                     ApproveMail(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId, customer, null);

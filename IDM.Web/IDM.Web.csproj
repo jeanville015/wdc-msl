@@ -2659,8 +2659,8 @@
     <Content Include="Volo.Abp.Core.abppkg.analyze.json" />
     <Content Include="Volo.Abp.Core.abppkg" />
     <Content Include="Views\Main\Staging\Staging_WImage.cshtml" />
-    <Content Include="Views\Main\Staging\2KX\_list.cshtml" />
-    <Content Include="Views\Main\Staging\2KX\Details\_list.cshtml" />
+    <Content Include="Views\Main\Staging\WImage\_list.cshtml" />
+    <Content Include="Views\Main\Staging\WImage\Details\_list.cshtml" />
     <Content Include="Views\Main\PendingData\PendingData.cshtml" />
     <Content Include="Views\Main\PendingData\_list_obsolete.cshtml" />
     <Content Include="Views\Main\PendingData\_list.cshtml" />

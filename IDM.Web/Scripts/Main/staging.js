@@ -210,6 +210,10 @@ var StagingModule = (function () {
 
                                     let infoHtml = '<div class="row m-2 p-2 border bg-light">';
                                     headerColumns.forEach(col => {
+                                        // Skip the AnalysisTrial column entirely
+                                        if (col === "AnalysisTrial") {
+                                            return;
+                                        }
                                         let val = getCellValue(firstRow, col) || 'N/A';
                                         val = formatDateValue(val, col)
                                         infoHtml += `
@@ -233,24 +237,6 @@ var StagingModule = (function () {
                                     $table.find('thead').append('<tr><th>No Data</th></tr>');
                                     $table.find('tbody').append('<tr><td>No data available</td></tr>');
                                 }
-
-                                ////-------------------------------------------------------------------------------
-                                //// Clear existing table content
-                                //const $table = $('#stagingTable');
-                                //$table.find('thead').empty();
-                                //$table.find('tbody').empty();
-
-                                //// Create dynamic table based on data structure
-                                //if (dataResponse && dataResponse.data && dataResponse.data.length > 0) {
-                                //    const columns = buildColumnList(dataResponse.data[0]);
-                                //    renderTableHeader($table, columns);
-                                //    renderTableRows($table, dataResponse.data, columns);
-                                //} else {
-                                //    // Show no data message
-                                //    $table.find('thead').append('<tr><th>No Data</th></tr>');
-                                //    $table.find('tbody').append('<tr><td>No data available</td></tr>');
-                                //}
-                                ////-------------------------------------------------------------------------------
 
                                 resolve();
                             },

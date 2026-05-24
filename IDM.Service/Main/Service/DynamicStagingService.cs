@@ -326,7 +326,7 @@ namespace IDM.Service.Main.Service
             return true;
         }
 
-        public async Task<OperationResult> PrepareMQInputDataTable(DataTable dataTable, string sourceTable, string destinationTable, string userId, ConfigDTO configDTO)
+        public async Task<OperationResult> PrepareMQInputDataTable(DataTable dataTable, string sourceTable, string destinationTable, string userId, ConfigDTO configDTO, string[] excludedFields)
         {
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "MQ Process Successful!" }; 
             try
@@ -337,7 +337,7 @@ namespace IDM.Service.Main.Service
                 //var config = ConfigFactory.GetMqConfiguration(); 
 
                 string primaryKeyIdLabel = FormatDataName(sourceTable);
-                string[] excludedFields = { primaryKeyIdLabel, "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
+                excludedFields.Append(primaryKeyIdLabel);
                 foreach (var field in excludedFields)
                 {
                     if (dataTable.Columns.Contains(field))
@@ -416,15 +416,16 @@ namespace IDM.Service.Main.Service
             var configDTO = ConfigFactory.GetMqConfiguration();
 
             //Note: MQ input execution---------------------------------------------------------------------------------------------------------
-            //NOTE:DISABLE FOR AWHILE UNTIL THE MQSENDING LEVEL ERROR WAS RESOLVED
             //sample tables: DATA_STAGING_2KX, DATA_STAGING_100KX
             DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-            OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId, configDTO);
+            string[] excludedFields_Main = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
+            OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId, configDTO, excludedFields_Main);
             if (MainTableMQInput.OperationStatus == false) { return MainTableMQInput; }
 
             //sample tables: DATA_STAGING_DEFECT
             DataTable dataTableDefect = await GetDataStagingDefectDataTableAsync("DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial, null, null);
-            OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId, configDTO);
+            string[] excludedFields_Defect = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
+            OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId, configDTO, excludedFields_Defect);
             if (DefectTableMQInput.OperationStatus == false) { return DefectTableMQInput; }
             //---------------------------------------------------------------------------------------------------------------------------------
 
