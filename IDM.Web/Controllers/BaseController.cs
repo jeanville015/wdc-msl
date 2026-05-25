@@ -283,6 +283,17 @@ namespace IDM.Web.Controllers
             return result;
         }
 
+        protected string SanitizeAdUserId(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return userId;
+
+            if (userId.StartsWith(@"ad\", StringComparison.OrdinalIgnoreCase))
+                return userId.Substring(3);
+
+            return userId;
+        }
+
         public BaseController(IEmailService emailService, IUserService userService)
         {
             _emailService = emailService;
@@ -295,7 +306,7 @@ namespace IDM.Web.Controllers
             // Temporary bridge - manually instantiate services until all controllers use proper DI
             var config = GetConfiguration();
             _userService = new IDM.Service.Common.Service.UserService();
-            _emailService = new IDM.Service.Common.Service.EmailService(_userService, config, new IDM.Web.Utility.MailSender());
+            _emailService = new IDM.Service.Common.Service.EmailService(_userService, new IDM.Web.Utility.MailSender());
         }
     }
 }

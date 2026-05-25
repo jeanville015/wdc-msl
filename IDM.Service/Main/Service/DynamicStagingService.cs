@@ -24,49 +24,16 @@ namespace IDM.Service.Main.Service
     {
         private readonly IDynamicStagingRepository _dynamicStagingRepository;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
         //protected readonly IEmailService _emailService;
         //protected readonly IUserService _userService;
 
-        public DynamicStagingService(IDynamicStagingRepository dynamicStagingRepository, IMapper mapper)
+        public DynamicStagingService(IDynamicStagingRepository dynamicStagingRepository, IMapper mapper, IEmailService emailService)
         {
             _dynamicStagingRepository = dynamicStagingRepository;
             _mapper = mapper;
-            //_emailService = emailService;
-            //_userService = userService;
-        }
-
-        //protected ConfigDTO GetConfiguration()
-        //{
-        //    return new ConfigDTO
-        //    {
-        //        MQConnectionFile = GetAppSetting("MQConnectionFile"),
-        //        MQTransaction = GetAppSetting("MQTransaction"),
-        //        MQTransactionTrial = GetAppSetting("MQTransactionTrial"),
-        //        MQVersion = GetAppSetting("MQVersion"),
-        //        MQExcludeColumn = GetAppSetting("MQExcludeColumn"),
-        //        MQAdjustColumn = GetAppSetting("MQAdjustColumn"),
-
-        //        SMTPHost = GetAppSetting("SMTPHost"),
-        //        SMTPPort = GetAppSetting("SMTPPort"),
-        //        EmailSender = GetAppSetting("EmailSender"),
-        //        DefaultEmailRecipients = GetAppSetting("DefaultEmailRecipients"),
-        //        Website = GetAppSetting("Website")
-        //    };
-        //}
-
-        //protected string GetAppSetting(string key)
-        //{
-        //    return ConfigurationManager.AppSettings[key]?.ToString() ?? string.Empty;
-        //}
-
-
-        //public DynamicStagingService()
-        //{
-        //    // Temporary bridge - manually instantiate services until all controllers use proper DI
-        //    var config = GetConfiguration();
-        //    _userService = new IDM.Service.Common.Service.UserService();
-        //    _emailService = new IDM.Service.Common.Service.EmailService(_userService, config, new IDM.Web.Utility.MailSender());
-        //}
+            _emailService = emailService;
+        } 
 
         public class TableData
         {
@@ -122,6 +89,130 @@ namespace IDM.Service.Main.Service
                 throw new Exception($"Error in service updating staging data value: {ex.Message}", ex);
             }
         }
+
+        public async Task<OperationResult> SetApprovalStagingWImage(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string userId)
+        {
+            var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
+
+            //CODE CLEANUP------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            ////////////////////////////try
+            ////////////////////////////{
+            ////////////////////////////    //--lines with (--) on the start, disable/bypass for now to give way to new logic QA
+            ////////////////////////////    var resultSetApproval = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
+
+            ////////////////////////////    if (status == "REJECTED")
+            ////////////////////////////    {
+            ////////////////////////////        //--var resultEmailSendRejectionEmail = _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId).Result;
+            ////////////////////////////    }
+            ////////////////////////////    else
+            ////////////////////////////    {
+            ////////////////////////////        //Note: MQ input execution---------------------------------------------------------------------------------------------------------
+            ////////////////////////////        DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+            ////////////////////////////        OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId); 
+            ////////////////////////////        DataTable dataTableDefect = await GetDataStagingDefectDataTableAsync("DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial, null, null);
+            ////////////////////////////        OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId);
+            ////////////////////////////        //---------------------------------------------------------------------------------------------------------------------------------
+
+            ////////////////////////////        OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial);
+
+            ////////////////////////////        var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
+            ////////////////////////////        //--var resultEmailSendApprovalEmail = _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer).Result;
+            ////////////////////////////    }
+            ////////////////////////////}
+            ////////////////////////////catch (Exception ex)
+            ////////////////////////////{
+            ////////////////////////////    result.OperationStatus = false;
+            ////////////////////////////    result.OperationStatusMessage = ex.Message;
+            ////////////////////////////    return result;
+            ////////////////////////////}  
+            ////////////////////////////return result;
+
+            if (status == "REJECTED")
+            {
+                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
+                if (resultEmailSendRejectionEmail)
+                {
+                    result.OperationStatus = true;
+                    result.OperationStatusMessage = "REJECT Successful!";
+                }
+            }
+            else //status == "APPROVED"
+            {
+                bool setItemStatus = true;
+                setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
+                if (setItemStatus == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Upating of the item status was unsuccessful" }; }
+
+                var configDTO = ConfigFactory.GetMqConfiguration();
+
+                //Note: MQ input execution---------------------------------------------------------------------------------------------------------
+                //sample tables: DATA_STAGING_2KX, DATA_STAGING_100KX
+                DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+                string[] excludedFields_Main = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
+                OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId, configDTO, excludedFields_Main);
+                if (MainTableMQInput.OperationStatus == false) { return MainTableMQInput; }
+
+                //sample tables: DATA_STAGING_DEFECT
+                DataTable dataTableDefect = await GetDataStagingDefectDataTableAsync("DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial, null, null);
+                string[] excludedFields_Defect = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
+                OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId, configDTO, excludedFields_Defect);
+                if (DefectTableMQInput.OperationStatus == false) { return DefectTableMQInput; }
+                //---------------------------------------------------------------------------------------------------------------------------------
+
+                //Note: File transfer and DB updating operations
+                OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial, configDTO);
+                if (executeBDPRequirementsProcess.OperationStatus == false) { return executeBDPRequirementsProcess; }
+            } 
+
+            //no errors on executed process above
+            return result;
+        }
+
+        public async Task<OperationResult> ProcessApprovalWithNotificationAsync(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, object tableData, string userId, ConfigDTO config, string returnUrl = null)
+        {
+            var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
+
+            // set actual status if APPROVED or REJECTED
+            var resultSetDecision = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, userId);
+            if (resultSetDecision == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Upating of the item status was unsuccessful" }; }
+
+            if (status == "REJECTED")
+            {
+                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
+                if (resultEmailSendRejectionEmail) 
+                {
+                    result.OperationStatus = true;
+                    result.OperationStatusMessage = "REJECT Successful!"; 
+                }
+
+            }
+            else
+            { 
+                // MQ upload (previously inline in controller)
+                string[] excludedFields = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
+                DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+                OperationResult mqResult = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId, config, excludedFields);
+
+                if (!mqResult.OperationStatus)
+                {
+                    return new OperationResult { OperationStatus = false, OperationStatusMessage = "Error uploading on MQ" };
+                }
+
+                // 3. Approval email
+                var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
+                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl);
+                if (resultEmailSendApproveEmail) 
+                {
+                    result.OperationStatus = true;
+                    result.OperationStatusMessage = "Set Approval Successful!";
+                }
+            }
+
+            // next refactor: figureout how to extend <OperationResult> object to Infrastructure/IDM.Repository domain
+            //result.OperationStatus = true;
+            //result.OperationStatusMessage = null; // can retrieve message from Repository layer; on next refactor
+            return result;
+        }
+
         public async Task<bool> SetApprovalAsync(string table, string amethystJob, string analysis, int analysisTrial, string status, string toolName, object tableData, string updatedBy)
         {
             try
@@ -369,71 +460,6 @@ namespace IDM.Service.Main.Service
 
                 // Optional: Log the full exception (ex) to your logging framework
             }
-            return result;
-        }
-
-        public async Task<OperationResult> SetApprovalStagingWImage(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string userId)
-        {
-            var result = new OperationResult() { OperationStatus=true, OperationStatusMessage="Set Approval Successful!"};
-
-            //CODE CLEANUP------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            ////////////////////////////try
-            ////////////////////////////{
-            ////////////////////////////    //--lines with (--) on the start, disable/bypass for now to give way to new logic QA
-            ////////////////////////////    var resultSetApproval = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
-
-            ////////////////////////////    if (status == "REJECTED")
-            ////////////////////////////    {
-            ////////////////////////////        //--var resultEmailSendRejectionEmail = _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId).Result;
-            ////////////////////////////    }
-            ////////////////////////////    else
-            ////////////////////////////    {
-            ////////////////////////////        //Note: MQ input execution---------------------------------------------------------------------------------------------------------
-            ////////////////////////////        DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-            ////////////////////////////        OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId); 
-            ////////////////////////////        DataTable dataTableDefect = await GetDataStagingDefectDataTableAsync("DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial, null, null);
-            ////////////////////////////        OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId);
-            ////////////////////////////        //---------------------------------------------------------------------------------------------------------------------------------
-
-            ////////////////////////////        OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial);
-
-            ////////////////////////////        var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
-            ////////////////////////////        //--var resultEmailSendApprovalEmail = _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer).Result;
-            ////////////////////////////    }
-            ////////////////////////////}
-            ////////////////////////////catch (Exception ex)
-            ////////////////////////////{
-            ////////////////////////////    result.OperationStatus = false;
-            ////////////////////////////    result.OperationStatusMessage = ex.Message;
-            ////////////////////////////    return result;
-            ////////////////////////////}  
-            ////////////////////////////return result;
-
-            bool setItemStatus = true;
-            setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
-            if (setItemStatus==false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Upating of the item status was unsuccessful" }; }
-
-            var configDTO = ConfigFactory.GetMqConfiguration();
-
-            //Note: MQ input execution---------------------------------------------------------------------------------------------------------
-            //sample tables: DATA_STAGING_2KX, DATA_STAGING_100KX
-            DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-            string[] excludedFields_Main = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
-            OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId, configDTO, excludedFields_Main);
-            if (MainTableMQInput.OperationStatus == false) { return MainTableMQInput; }
-
-            //sample tables: DATA_STAGING_DEFECT
-            DataTable dataTableDefect = await GetDataStagingDefectDataTableAsync("DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial, null, null);
-            string[] excludedFields_Defect = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
-            OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId, configDTO, excludedFields_Defect);
-            if (DefectTableMQInput.OperationStatus == false) { return DefectTableMQInput; }
-            //---------------------------------------------------------------------------------------------------------------------------------
-
-            //Note: File transfer and DB updating operations
-            OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial, configDTO);
-            if (executeBDPRequirementsProcess.OperationStatus == false) { return executeBDPRequirementsProcess; }
-
-            //no errors on executed process above
             return result;
         }
 

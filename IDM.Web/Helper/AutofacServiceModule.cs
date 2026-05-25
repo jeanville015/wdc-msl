@@ -8,6 +8,7 @@ using IDM.Service.Maintenance.Interface;
 using IDM.Service.Maintenance.Service;
 using IDM.Service.User.Interface;
 using IDM.Service.User.Service;
+using IDM.Web.Utility;
 
 namespace IDM.Web.Helper
 {
@@ -118,6 +119,11 @@ namespace IDM.Web.Helper
             builder.RegisterType<EmailService>()
                      .As<IEmailService>()
                      .InstancePerRequest();
+
+            builder.RegisterType<MailSender>()
+                .As<IMailSender>()
+                .InstancePerRequest();
+
 
         }
     }

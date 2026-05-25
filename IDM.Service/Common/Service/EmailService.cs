@@ -2,6 +2,7 @@ using IDM.DTO;
 using IDM.DTO.Main;
 using IDM.Service.Common.Interface;
 using System;
+using System.Configuration;
 using System.Threading.Tasks;
 
 namespace IDM.Service.Common.Service
@@ -12,11 +13,29 @@ namespace IDM.Service.Common.Service
         private readonly ConfigDTO _config;
         private readonly IMailSender _mailSender;
 
-        public EmailService(IUserService userService, ConfigDTO config, IMailSender mailSender)
+        public EmailService(IUserService userService, IMailSender mailSender)
         {
             _userService = userService;
-            _config = config;
             _mailSender = mailSender;
+            _config = LoadConfig();
+        }
+
+        private ConfigDTO LoadConfig()
+        {
+            return new ConfigDTO
+            {
+                MQConnectionFile = ConfigurationManager.AppSettings["MQConnectionFile"],
+                MQTransaction = ConfigurationManager.AppSettings["MQTransaction"], 
+                MQTransactionTrial =  ConfigurationManager.AppSettings["MQTransactionTrial"],
+                MQVersion = ConfigurationManager.AppSettings["MQVersion"],
+                MQExcludeColumn = ConfigurationManager.AppSettings["MQExcludeColumn"],
+                MQAdjustColumn = ConfigurationManager.AppSettings["MQAdjustColumn"],
+                SMTPHost = ConfigurationManager.AppSettings["SMTPHost"],
+                SMTPPort = ConfigurationManager.AppSettings["SMTPPort"],
+                EmailSender = ConfigurationManager.AppSettings["EmailSender"],
+                DefaultEmailRecipients = ConfigurationManager.AppSettings["DefaultEmailRecipients"],
+                Website = ConfigurationManager.AppSettings["Website"] 
+            };
         }
 
         public async Task<bool> SendFailedDataEmailAsync(IncomingDataDTO incomingData)

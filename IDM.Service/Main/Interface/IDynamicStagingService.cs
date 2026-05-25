@@ -5,6 +5,7 @@ using IDM.Model.Main;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using static IDM.Service.Main.Service.DynamicStagingService;
 
 namespace IDM.Service.Main.Interface
 {
@@ -21,6 +22,7 @@ namespace IDM.Service.Main.Interface
         Task<bool> MQUploadPreparationParameter(object table, ConfigDTO configDTO, string destinationTable, string approver);
         Task<OperationResult> SetApprovalStagingWImage(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string userId);
         Task<OperationResult> PrepareMQInputDataTable(DataTable dataTable, string sourceTable, string destinationTable, string userId, ConfigDTO configDTO, string[] excludedFields);
+        Task<OperationResult> ProcessApprovalWithNotificationAsync(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, object tableData, string userId, ConfigDTO config, string returnUrl = null);
 
     }
 }

@@ -87,11 +87,13 @@ namespace IDM.Web.Controllers.Main
 
                 if (!string.IsNullOrEmpty(analyzedBy))
                 {
-                    // Sanitize: remove "ad\" or "AD\" if present at the start
-                    if (analyzedBy.StartsWith(@"ad\", StringComparison.OrdinalIgnoreCase))
-                    {
-                        analyzedBy = analyzedBy.Substring(3);
-                    }
+                    //// Sanitize: remove "ad\" or "AD\" if present at the start
+                    //if (analyzedBy.StartsWith(@"ad\", StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    analyzedBy = analyzedBy.Substring(3);
+                    //}
+
+                    analyzedBy = SanitizeAdUserId(analyzedBy);
 
                     string dataNewAnalyzedBy = await _userService.GetUserNameAsync(analyzedBy);
 
@@ -220,37 +222,14 @@ namespace IDM.Web.Controllers.Main
                 var tableData = JsonConvert.DeserializeObject<TableData>(tableContent);
 
                 ////var tableData = await _dynamicStagingService.GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+                //var result = await _dynamicStagingService.SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, UserId);
 
-                var result = await _dynamicStagingService.SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, UserId);
+                analyzedBy = SanitizeAdUserId(analyzedBy);
+                var result = await _dynamicStagingService.ProcessApprovalWithNotificationAsync(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableData, UserId, config); 
 
-                if (status == "REJECTED")
+                if (!result.OperationStatus)
                 {
-                    RejectedMail(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId);
-                }
-                else
-                {
-
-                    //--NOTE: OLD CODE for MQUPLOAD-----------------------------------------------------------------------------------------------//
-                    //var uploaded = await _dynamicStagingService.MQUploadPreparationParameter(tableData, config, table, UserId);
-                    //if (!uploaded)
-                    //{
-                    //    return Json(new { success = false, message = "Error uploading on MQ", data = uploaded }, JsonRequestBehavior.AllowGet);
-                    //}
-                    //----------------------------------------------------------------------------------------------------------------------------//
-
-                    //--NOTE: NEW MQUPLOAD--------------------------------------------------------------------------------------------------------//
-                    DataTable dataTableMain = await _dynamicStagingService.GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-                    string[] excludedFields_Main = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
-                    OperationResult MainTableMQInput = await _dynamicStagingService.PrepareMQInputDataTable(dataTableMain, sourceTable, table, UserId, config, excludedFields_Main);
-                    if (MainTableMQInput.OperationStatus == false) 
-                    { 
-                        return Json(new { success = false, message = "Error uploading on MQ", data = MainTableMQInput.OperationStatus }, JsonRequestBehavior.AllowGet); 
-                    }
-                    //----------------------------------------------------------------------------------------------------------------------------//
-
-
-                    var customer = await _dynamicStagingService.GetCustomerAsync(amethystJob, analysis, analysisTrial);
-                    ApproveMail(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId, customer, null);
+                    return Json(new { success = false, message = result.OperationStatusMessage }, JsonRequestBehavior.AllowGet);
                 }
 
                 return Json(new { success = true, message = "Approval processed successfully", data = result }, JsonRequestBehavior.AllowGet);
@@ -267,23 +246,48 @@ namespace IDM.Web.Controllers.Main
             //return Json(new { success = false, message = "This Feature/Process is under development!"}, JsonRequestBehavior.AllowGet); 
 
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
-            if (status == "REJECTED")
-            {
-                var resultEmailSendRejectionEmail = _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId).Result;
-            }
-            else //status == "APPROVED"
-            {
+            //if (status == "REJECTED")
+            //{
+            //    var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId);
+            //}
+            //else //status == "APPROVED"
+            //{
 
-                OperationResult ORsetApprovalStagingWImage = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId);
-                if (ORsetApprovalStagingWImage.OperationStatus == false)
+            //    OperationResult ORsetApprovalStagingWImage = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId);
+            //    if (ORsetApprovalStagingWImage.OperationStatus == false)
+            //    {
+            //        return Json(new { success = false, message = "Error processing approval: " + ORsetApprovalStagingWImage.OperationStatusMessage }, JsonRequestBehavior.AllowGet);
+            //    }
+
+            //    var customer = await _dynamicStagingService.GetCustomerAsync(amethystJob, analysis, analysisTrial);
+            //    var resultEmailSendApprovalEmail = _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId, customer, returnUrl).Result;
+            //}
+
+            try
+            {
+                var config = GetConfiguration(); 
+
+                ////var tableData = await _dynamicStagingService.GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+                //var result = await _dynamicStagingService.SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, UserId);
+
+                analyzedBy = SanitizeAdUserId(analyzedBy);
+                result = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId);
+
+                if (!result.OperationStatus)
                 {
-                    return Json(new { success = false, message = "Error processing approval: " + ORsetApprovalStagingWImage.OperationStatusMessage }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = false, message = result.OperationStatusMessage }, JsonRequestBehavior.AllowGet);
                 }
 
-                var customer = await _dynamicStagingService.GetCustomerAsync(amethystJob, analysis, analysisTrial);
-                var resultEmailSendApprovalEmail = _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId, customer, returnUrl).Result;
+                return Json(new { success = true, message = "Approval processed successfully", data = result }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { success = true, message = "Approval processed successfully", data = true }, JsonRequestBehavior.AllowGet); 
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error processing approval: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+
+
+            //OperationResult ORsetApprovalStagingWImage = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId);
+            //return Json(new { success = true, message = "Approval processed successfully", data = true }, JsonRequestBehavior.AllowGet); 
         }
 
         //[HttpGet]
