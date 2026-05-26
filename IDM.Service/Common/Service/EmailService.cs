@@ -2,7 +2,9 @@ using IDM.DTO;
 using IDM.DTO.Main;
 using IDM.Service.Common.Interface;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IDM.Service.Common.Service
@@ -91,7 +93,7 @@ namespace IDM.Service.Common.Service
 
                 emailContent += "</table>" + BuildEmailFooter(null);
 
-                var mailModel = CreateMailViewModel(_config.DefaultEmailRecipients, "IDM Data Entry : Failed/OOC", emailContent);
+                var mailModel = await CreateMailViewModel(null, _config.DefaultEmailRecipients, "IDM Data Entry : Failed/OOC", emailContent);
                 _mailSender.SendMail(mailModel);
 
                 return true;
@@ -103,7 +105,7 @@ namespace IDM.Service.Common.Service
             }
         }
 
-        public async Task<bool> SendRejectionEmailAsync(string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver)
+        public async Task<bool> SendRejectionEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver)
         {
             try
             {
@@ -115,7 +117,7 @@ namespace IDM.Service.Common.Service
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='warning'>{status}</span> by Ma'am/Sir {approverName}</p>" +
                                         BuildEmailFooter(null);
 
-                var mailModel = CreateMailViewModel(recipientEmail, "MSL Web System : FAILED", emailContent);
+                var mailModel = await CreateMailViewModel(userList, recipientEmail, "MSL Web System : FAILED", emailContent);
                 _mailSender.SendMail(mailModel);
 
                 return true;
@@ -127,7 +129,7 @@ namespace IDM.Service.Common.Service
             }
         }
 
-        public async Task<bool> SendApprovalEmailAsync(string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, string customer, string returnUrl)
+        public async Task<bool> SendApprovalEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, string customer, string returnUrl)
         {
             try
             {
@@ -142,7 +144,7 @@ namespace IDM.Service.Common.Service
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='success'>{status}</span> by Ma'am/Sir {approverName}</p>" +
                                         BuildEmailFooter(returnUrl);
 
-                var mailModel = CreateMailViewModel(allRecipients, "MSL Web System : APPROVED", emailContent);
+                var mailModel = await CreateMailViewModel(userList, allRecipients, "MSL Web System : APPROVED", emailContent);
                 _mailSender.SendMail(mailModel);
 
                 return true;
@@ -182,8 +184,27 @@ namespace IDM.Service.Common.Service
                    "</body></html>";
         }
 
-        private MailViewModel CreateMailViewModel(string to, string subject, string body)
+        private async Task<MailViewModel> CreateMailViewModel(IEnumerable<string> userList, string to, string subject, string body)
         {
+
+            var userListEmail = new List<string>(); 
+            if (userList != null)
+            {
+                foreach (string ccUserId in userList)
+                {
+                    if (!string.IsNullOrWhiteSpace(ccUserId))
+                    {
+                        string email = await _userService.GetUserEmailAsync(ccUserId);
+
+                        // Only add if the returned email is not empty or null
+                        if (!string.IsNullOrWhiteSpace(email))
+                        {
+                            userListEmail.Add(email);
+                        }
+                    }
+                }
+            }
+
             return new MailViewModel()
             {
                 Host = _config.SMTPHost,
@@ -191,6 +212,7 @@ namespace IDM.Service.Common.Service
                 IsSSLEnabled = false,
                 From = _config.EmailSender,
                 To = to,
+                CcList = userListEmail,
                 Subject = subject,
                 Body = body
             };

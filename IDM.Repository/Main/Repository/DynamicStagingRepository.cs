@@ -314,5 +314,32 @@ namespace IDM.Repository.Main.Repository
                 }
             }
         }
+
+        public async Task<IEnumerable<string>> GetUserListByAnalysisAsync(string analysisName)
+        {
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                try
+                {
+                    var sql = $"SELECT [U_List].[USER_ID]" +
+                        $"FROM [USER_ANALYSIS] [U_Analysis] " +
+                        $"INNER JOIN [USER_LIST] U_List ON [U_Analysis].[USER_ID] = U_List.[ID]" +
+                        $"INNER JOIN [MAINT_Analysis] [M_Analysis] ON  [U_Analysis].[MAINT_ANALYSIS_ID] = [M_Analysis].[AnalysisId]" +
+                        $"WHERE [M_Analysis].[AnalysisName] = @analysisName";
+
+                    // Get dynamic data first
+                    var dynamicData = await connection.QueryAsync(sql, new { analysisName });
+
+                    // Convert dynamicData to List<String> object
+                    var result = dynamicData.Select(x => (string)x.USER_ID).ToList(); 
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+            }
+        }
+
     }
 }

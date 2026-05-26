@@ -90,7 +90,7 @@ namespace IDM.Service.Main.Service
             }
         }
 
-        public async Task<OperationResult> SetApprovalStagingWImage(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string userId)
+        public async Task<OperationResult> SetApprovalStagingWImage(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string userId, string returnUrl)
         {
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
 
@@ -127,9 +127,14 @@ namespace IDM.Service.Main.Service
             ////////////////////////////}  
             ////////////////////////////return result;
 
+            bool setItemStatus = true;
+            setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
+            if (setItemStatus == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Updating of the item status was unsuccessful" }; }
+
             if (status == "REJECTED")
             {
-                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
+                var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
+                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
                 if (resultEmailSendRejectionEmail)
                 {
                     result.OperationStatus = true;
@@ -138,10 +143,6 @@ namespace IDM.Service.Main.Service
             }
             else //status == "APPROVED"
             {
-                bool setItemStatus = true;
-                setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
-                if (setItemStatus == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Upating of the item status was unsuccessful" }; }
-
                 var configDTO = ConfigFactory.GetMqConfiguration();
 
                 //Note: MQ input execution---------------------------------------------------------------------------------------------------------
@@ -161,7 +162,16 @@ namespace IDM.Service.Main.Service
                 //Note: File transfer and DB updating operations
                 OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial, configDTO);
                 if (executeBDPRequirementsProcess.OperationStatus == false) { return executeBDPRequirementsProcess; }
-            } 
+
+                var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
+                var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
+                var resultEmailSendApproveEmail = _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl).Result;
+                if (resultEmailSendApproveEmail)
+                {
+                    result.OperationStatus = true;
+                    result.OperationStatusMessage = "Set Approval Successful!";
+                }
+            }
 
             //no errors on executed process above
             return result;
@@ -173,11 +183,12 @@ namespace IDM.Service.Main.Service
 
             // set actual status if APPROVED or REJECTED
             var resultSetDecision = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, userId);
-            if (resultSetDecision == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Upating of the item status was unsuccessful" }; }
+            if (resultSetDecision == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Updating of the item status was unsuccessful" }; }
 
             if (status == "REJECTED")
             {
-                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
+                var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
+                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
                 if (resultEmailSendRejectionEmail) 
                 {
                     result.OperationStatus = true;
@@ -199,7 +210,8 @@ namespace IDM.Service.Main.Service
 
                 // 3. Approval email
                 var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
-                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl);
+                var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
+                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl);
                 if (resultEmailSendApproveEmail) 
                 {
                     result.OperationStatus = true;

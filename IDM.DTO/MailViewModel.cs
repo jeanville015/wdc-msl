@@ -11,6 +11,7 @@ namespace IDM.DTO
         public string To { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
+        public IEnumerable<string> CcList {  get; set; }
         public List<string> Attachments { get; set; } = new List<string>();
     }
 }

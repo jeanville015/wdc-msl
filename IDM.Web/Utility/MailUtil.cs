@@ -21,6 +21,18 @@ namespace IDM.Web.Utility
                     mail.Body = mailModel.Body;
                     mail.IsBodyHtml = true;
 
+                    // Loop and add CC recipients
+                    if (mailModel.CcList != null)
+                    {
+                        foreach (string ccEmail in mailModel.CcList)
+                        {
+                            if (! string.IsNullOrWhiteSpace(ccEmail))
+                            {
+                                mail.CC.Add(ccEmail);
+                            }
+                        }
+                    }
+
                     //Way to add attachment
                     foreach (string attachment in mailModel.Attachments)
                     {

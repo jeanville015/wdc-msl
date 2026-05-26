@@ -93,6 +93,8 @@ namespace IDM.Web.Controllers.Main
                     //    analyzedBy = analyzedBy.Substring(3);
                     //}
 
+
+                    // will removed the unnecessary 'Ad/' on the value
                     analyzedBy = SanitizeAdUserId(analyzedBy);
 
                     string dataNewAnalyzedBy = await _userService.GetUserNameAsync(analyzedBy);
@@ -265,13 +267,15 @@ namespace IDM.Web.Controllers.Main
 
             try
             {
-                var config = GetConfiguration(); 
+                var config = GetConfiguration();
 
                 ////var tableData = await _dynamicStagingService.GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
                 //var result = await _dynamicStagingService.SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, UserId);
 
+                // will removed the unnecessary 'Ad/' on the value
                 analyzedBy = SanitizeAdUserId(analyzedBy);
-                result = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId);
+
+                result = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId, returnUrl);
 
                 if (!result.OperationStatus)
                 {

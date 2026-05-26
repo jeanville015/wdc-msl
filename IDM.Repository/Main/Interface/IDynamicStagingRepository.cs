@@ -17,6 +17,7 @@ namespace IDM.Repository.Main.Interface
         Task<bool> UpdateStagingDataValueAsync(string Table, DataIdValuePair _DataIdValuePair, DataNameValuePair _DataNameValuePair);
         Task<string> GetCustomerAsync(string amethystJob, string analysis, int analysisTrial);
         Task<string> GetStatusAsync(string amethystJob, string analysis, int analysisTrial);
+        Task<IEnumerable<string>> GetUserListByAnalysisAsync(string analysisName);
 
     }
 }
