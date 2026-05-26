@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Area";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right" id="addArea">
+            <i class="fas fa-plus"></i> Add Area
+        </button>
+    </div>
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="areaTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Area</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="areaModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Area Details</h5>
+                <button type="button" id="close-area" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Area <span class="text-danger">*</span></label>
+                        <input type="text" id="txtArea" class="form-control" placeholder="Enter Area">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-area" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-area" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+            getArea: '@Url.Action("GetArea", "Area", new { area = "Maintenance" })',
+            addArea: '@Url.Action("Create", "Area", new { area = "Maintenance" })',
+            editArea: '@Url.Action("Edit", "Area", new { area = "Maintenance" })',
+            deleteArea: '@Url.Action("Delete", "Area", new { area = "Maintenance" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Maintenance/area.js"></script>
+}

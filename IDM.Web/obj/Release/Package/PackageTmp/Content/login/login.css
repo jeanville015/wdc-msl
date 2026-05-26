@@ -1,0 +1,60 @@
+/* Custom Login Page Styles */
+/* Multi-color gradient for top accent border and button */
+
+.card-custom {
+    border-top: none !important;
+    position: relative;
+}
+
+.card-custom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00e5d1 0%, #0066ff 100%);
+}
+
+.btn-custom {
+    background: linear-gradient(135deg, #00e5d1 0%, #0066ff 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-custom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #00ccba 0%, #0052cc 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 229, 209, 0.4), 0 4px 12px rgba(0, 102, 255, 0.4);
+}
+
+.btn-custom:hover::before {
+    opacity: 1;
+}
+
+.btn-custom span {
+    position: relative;
+    z-index: 1;
+}
+
+.btn-custom:active,
+.btn-custom:focus {
+    background: linear-gradient(135deg, #00b3a3 0%, #0047b3 100%) !important;
+    box-shadow: none;
+    transform: translateY(0);
+}

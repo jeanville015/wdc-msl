@@ -1,0 +1,229 @@
+@{
+    var activeMenu = ViewData["ActiveMenu"]?.ToString() ?? "";
+    var activeSubMenu = ViewData["ActiveSubMenu"]?.ToString() ?? "";
+
+    var userGroup = Session["UserGroup"]?.ToString() ?? "";
+    bool showMSL = userGroup == "IT" || userGroup == "MSL";
+    bool showSQE = userGroup == "IT" || userGroup == "SQE";
+    bool showIT = userGroup == "IT";
+
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    bool allowManagementModule = userRole == "Admin";
+}
+<aside class="main-sidebar sidebar-dark-white elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link d-flex align-items-center">
+        <img src="@Url.Content("~/Content/dist/img/wdpngnew.png")" width="48" height="48" class="mr-2" title="WD Logo" style="object-fit: contain;" />
+        <div class="d-flex flex-column justify-content-center" style="line-height: 1;">
+            <span class="brand-text font-weight-bold" style="font-size: 1.1rem;">MSL</span>
+            <span class="brand-text font-weight-light" style="font-size: 0.9rem;">Management System</span>
+        </div>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" data-accordion="false">
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Home")" class="nav-link  @(activeMenu == "Home" ? "active" : "")">
+                        <i class="fas fa-home nav-icon"></i>
+                        <p>Home</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "UnderConstruction")" class="nav-link  @(activeMenu == "Dashboard" ? "active" : "")">
+                        <i class="fas fa-chart-pie nav-icon"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Timeline")" class="nav-link  @(activeMenu == "Timeline" ? "active" : "")">
+                        <i class="fas fa-history nav-icon"></i>
+                        <p>Timeline</p>
+                    </a>
+                </li>
+
+                <!-- MSL SECTION -->
+                @if (showMSL)
+                {
+                    <li class="nav-header">MSL Section</li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "ToolEntryItems")" class="nav-link  @(activeMenu == "ToolEntryItems" ? "active" : "")">
+                            <i class="fas fa-tools nav-icon"></i>
+                            <p>Tool Entry Items</p>
+                        </a>
+                    </li>
+                    @*<li class="nav-item">
+             <a href="@Url.Action("Index", "SmallToolEntry")" class="nav-link  @(activeMenu == "SmallToolEntry" ? "active" : "")">
+                 <i class="fas fa-tools nav-icon"></i>
+                 <p>Small Tool Data Entry</p>
+             </a>
+            </li>*@
+                }
+
+                <!-- SQE SECTION -->
+                @if (showSQE)
+                {
+                    <li class="nav-header">SQE Section</li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "IncomingData")" class="nav-link  @(activeMenu == "IncomingData" ? "active" : "")">
+                            <i class="fas fa-file-alt nav-icon"></i>
+                            <p>Incoming Data Entry</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Data")" class="nav-link  @(activeMenu == "Data" ? "active" : "")">
+                            <i class="fas fa-database nav-icon"></i>
+                            <p>Data</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "PendingData")" class="nav-link  @(activeMenu == "PendingData" ? "active" : "")">
+                            <i class="fas fa-database nav-icon"></i>
+                            <p>Pending</p>
+                        </a>
+                    </li>
+
+                }
+
+                @*<li class="nav-item">
+            <a href="@Url.Action("Index", "UnderConstruction")" class="nav-link  @(activeMenu == "Report" ? "active" : "")">
+                <i class="fas fa-chart-bar nav-icon"></i>
+                <p>Reports</p>
+            </a>
+        </li>*@
+                @*<li class="nav-header">Data</li>*@
+                @*&nbsp;*@
+
+                <!-- Management -->
+                @if (allowManagementModule)
+                {
+
+                    <li class="nav-header">Management</li>
+                    <li class="nav-item has-treeview @(activeMenu == "Maintenance" ? "menu-open" : "")">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-cogs"></i>
+                            <p>
+                                Maintenance
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview custom-submenu">
+                            @if (showSQE)
+                            {
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Material")" class="nav-link @(activeSubMenu == "Material" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Material</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Supplier")" class="nav-link @(activeSubMenu == "Supplier" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Supplier</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Manufacturer")" class="nav-link @(activeSubMenu == "Manufacturer" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Manufacturer</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Area")" class="nav-link @(activeSubMenu == "Area" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Area Application</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Parameter")" class="nav-link @(activeSubMenu == "Parameter" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Parameter</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Uom")" class="nav-link @(activeSubMenu == "Uom" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Uom</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "TestingSite")" class="nav-link @(activeSubMenu == "TestingSite" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Testing Site</p>
+                                    </a>
+                                </li>
+                            }
+
+                            @if (showMSL)
+                            {
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "ToolType")" class="nav-link @(activeSubMenu == "ToolType" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Tool Type</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Tool")" class="nav-link @(activeSubMenu == "Tool" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Tool</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "MaterialSettings")" class="nav-link @(activeSubMenu == "MaterialSettings" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Material Settings</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Defect")" class="nav-link @(activeSubMenu == "Defect" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Defect</p>
+                                    </a>
+                                </li>
+                            }
+
+                            @if (showIT)
+                            {
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Analysis")" class="nav-link @(activeSubMenu == "Analysis" ? "active" : "")" data-ajax="true">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Analysis</p>
+                                    </a>
+                                </li>
+                            }
+
+                        </ul>
+                    </li>
+
+                    <li class="nav-item has-treeview @(activeMenu == "User" ? "menu-open" : "")">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-user-cog"></i>
+                            <p>
+                                User
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview custom-submenu">
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "Account")" class="nav-link @(activeSubMenu == "Account" ? "active" : "")">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>List</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "Role")" class="nav-link @(activeSubMenu == "Role" ? "active" : "")">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Role</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- Add more items here... -->
+                    </li>
+
+                }
+
+            </ul>
+        </nav>
+    </div>
+</aside>

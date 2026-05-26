@@ -1,0 +1,22 @@
+﻿<ol class="breadcrumb float-sm-right">
+    @if (ViewData["Breadcrumbs"] is List<(string Title, string Url, string Class)> breadcrumbs && breadcrumbs.Any())
+    {
+        foreach (var (title, url, cssClass) in breadcrumbs)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                <li class="breadcrumb-item @cssClass">
+                    <a href="#">@title</a>
+                </li>
+            }
+            else
+            {
+                <li class="breadcrumb-item active">@title</li>
+            }
+        }
+    }
+    else
+    {
+        <li class="breadcrumb-item active">Home</li>
+    }
+</ol>

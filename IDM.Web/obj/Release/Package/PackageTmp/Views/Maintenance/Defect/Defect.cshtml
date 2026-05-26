@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Defect";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right ml-2" id="addDefect">
+            <i class="fas fa-plus"></i> Add Defect
+        </button>
+        <button class="btn btn-secondary btn-sm float-right" id="uploadFile">
+            <i class="fas fa-file-upload"></i> Upload File
+        </button>
+    </div>
+
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none;" />
+
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="defectTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Analysis</th>
+                        <th>Defect Type</th>
+                        <th>Defect</th>
+                        <th>2Kx Sem</th>
+                        <th>Talc</th>
+                        <th>OverAll Physical Defect</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="defectModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Defect Details</h5>
+                <button type="button" id="close-defect" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Analysis <span class="text-danger">*</span></label>
+                        <input type="text" id="txtAnalysis" class="form-control" placeholder="Enter Analysis">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Defect Type <span class="text-danger">*</span></label>
+                        <input type="text" id="txtDefectType" class="form-control" placeholder="Enter Defect Type">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Defect <span class="text-danger">*</span></label>
+                        <input type="text" id="txtDefect" class="form-control" placeholder="Enter Defect">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>2Kx Sem</label>
+                        <input type="text" id="txt2KxSem" class="form-control" placeholder="Enter 2Kx Sem">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Talc</label>
+                        <input type="text" id="txtTalc" class="form-control" placeholder="Enter Talc">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Overall Physical Defect</label>
+                        <input type="text" id="txtOverAllPhysicalDefect" class="form-control" placeholder="Enter Overall Physical Defect">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-defect" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-defect" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+           uploadFileDefect: '@Url.Action("UploadDefect", "Defect", new { area = "Maintenance" })',
+           getDefect: '@Url.Action("GetDefect", "Defect", new { area = "Maintenance" })',
+           addDefect: '@Url.Action("Create", "Defect", new { area = "Maintenance" })',
+           editDefect: '@Url.Action("Edit", "Defect", new { area = "Maintenance" })',
+           deleteDefect: '@Url.Action("Delete", "Defect", new { area = "Maintenance" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Maintenance/defect.js"></script>
+}

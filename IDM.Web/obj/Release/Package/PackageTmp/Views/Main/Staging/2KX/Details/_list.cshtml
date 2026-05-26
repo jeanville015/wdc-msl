@@ -1,0 +1,119 @@
+﻿@using IDM.DTO.Main.View;
+@using System.Collections.Generic
+@using System.Linq
+
+@model DynamicStagingDetailsView
+
+@if (Model != null)
+{
+    <!-- Static Header Container -->
+    <div class="card bg-light mb-3">
+        <div class="card-body py-2">
+            <!-- 'row' naturally aligns left; 'no-gutters' keeps them tight -->
+            <div class="row no-gutters">
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Job</label><span class="text-dark">@Model.AmethystJob</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Analysis</label><span class="text-dark">@Model.Analysis</span></div>
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Trial</label><span class="text-dark">@Model.AnalysisTrial</span></div> 
+                <div class="col-auto pr-5"><label class="text-muted small font-weight-bold d-block mb-0">Area</label><span class="text-dark">@Model.Area</span></div> 
+                <div class="col-auto"><label class="text-muted small font-weight-bold d-block mb-0">SubArea</label><span class="text-dark">@Model.SubArea</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive shadow-sm border rounded">
+        <table class="table table-bordered table-sm text-nowrap mb-0">
+            <thead class="thead-light bg-light">
+                <tr>
+                    @foreach (var h in Model.DynamicHeaders)
+                    {
+                        <th class="px-3">@h</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Data)
+                {
+                    <tr>
+                        @foreach (var h in Model.DynamicHeaders)
+                        {
+                            var cellValue = row.AdditionalProperties.ContainsKey(h) ? row.AdditionalProperties[h]?.ToString() : "";
+
+                            <td class="px-3 align-middle">
+                                @if (h.Equals("SemImage", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cellValue))
+                                {
+                                    <!-- Dynamic Thumbnail Injection -->
+                                    <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">
+                                        <!-- Loading Spinner -->
+                                        <div class="img-loader">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        </div>
+                                        <img src="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                             class="img-thumbnail img-trigger d-none"
+                                             style="height: 80px; width:auto; cursor: pointer; display:block;"
+                                             data-fullurl="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                             alt="Preview" 
+                                             onload="imageLoaded(this)" />
+                                    </div>
+                                    
+                                }
+                                else if (h.Equals("EdxImage", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cellValue))
+                                {
+                                    <!-- Dynamic Thumbnail Injection -->
+                                    <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">
+                                        <!-- Loading Spinner -->
+                                        <div class="img-loader">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        </div>
+                                        <img src="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                            class="img-thumbnail img-trigger d-none"
+                                            style="height: 80px; width:auto; cursor: pointer; display:block;"
+                                            data-fullurl="@Url.Action("Preview", "Staging", new { fullPath = cellValue })"
+                                            alt="Preview" 
+                                            onload="imageLoaded(this)" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    @cellValue
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- Reusable Large Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title"  >Preview</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+            <div class="modal-body text-center">
+                <img id="largeImage" src="" class="img-fluid" /> 
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () { 
+
+        $('.img-trigger').on('click', function () {
+            var src = $(this).data('fullurl');
+            $('#largeImage').attr('src', src);
+            $('#previewModal').modal('show');
+        });
+
+    });
+
+</script>

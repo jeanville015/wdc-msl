@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "Analysis";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right" id="addAnalysis">
+            <i class="fas fa-plus"></i> Add Analysis
+        </button>
+    </div>
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="analysisTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Tool Type</th>
+                        <th>Analysis Name</th>
+                        <th>Source Table</th>
+                        <th>Destination Table</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="analysisModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Analysis Details</h5>
+                <button type="button" id="close-analysis" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Tool Type <span class="text-danger">*</span></label>
+                        <select id="ddlToolType" class="form-control">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Analysis Name <span class="text-danger">*</span></label>
+                        <input type="text" id="txtAnalysisName" class="form-control" placeholder="Enter Analysis Name">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Source Table <span class="text-danger">*</span></label>
+                        <input type="text" id="txtSourceTable" class="form-control" placeholder="Enter Source Table">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Destination Table <span class="text-danger">*</span></label>
+                        <input type="text" id="txtDestinationTable" class="form-control" placeholder="Enter Destination Table">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-analysis" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-analysis" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+           getAnalysis: '@Url.Action("GetAnalysis", "Analysis", new { area = "Maintenance" })',
+           addAnalysis: '@Url.Action("Create", "Analysis", new { area = "Maintenance" })',
+           editAnalysis: '@Url.Action("Edit", "Analysis", new { area = "Maintenance" })',
+           deleteAnalysis: '@Url.Action("Delete", "Analysis", new { area = "Maintenance" })',
+
+           getToolType: '@Url.Action("GetToolType", "ToolType", new { area = "Maintenance" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Maintenance/analysis.js"></script>
+}

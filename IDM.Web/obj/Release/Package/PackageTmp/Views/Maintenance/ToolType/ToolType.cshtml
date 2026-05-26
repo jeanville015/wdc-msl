@@ -1,0 +1,76 @@
+﻿@{
+    ViewBag.Title = "Tool Type";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom px-4 py-3">
+        <button class="btn btn-primary btn-sm float-right" id="addToolType">
+            <i class="fas fa-plus"></i> Add Tool Type
+        </button>
+    </div>
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="toolTypeTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Tool Type Name</th>
+                        <th>Require Approval</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="toolTypeModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Tool Type Details</h5>
+                <button type="button" id="close-toolType" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Tool Type Name <span class="text-danger">*</span></label>
+                        <input type="text" id="txtToolTypeName" class="form-control" placeholder="Enter Tool Type Name">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="chkRequireApproval">
+                            <label class="custom-control-label" for="chkRequireApproval">Require Approval</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-toolType" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="save-toolType" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+           getToolType: '@Url.Action("GetToolType", "ToolType", new { area = "Maintenance" })',
+           addToolType: '@Url.Action("Create", "ToolType", new { area = "Maintenance" })',
+           editToolType: '@Url.Action("Edit", "ToolType", new { area = "Maintenance" })',
+           deleteToolType: '@Url.Action("Delete", "ToolType", new { area = "Maintenance" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Maintenance/toolType.js"></script>
+}

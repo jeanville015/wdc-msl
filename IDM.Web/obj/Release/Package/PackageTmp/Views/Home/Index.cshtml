@@ -1,0 +1,165 @@
+@{
+    ViewBag.Title = "Home";
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <div id="divApplicationStatus" class="p-2 bg-light rounded">
+            <div class="card shadow-sm mb-3">
+                @*<div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-home mr-2"></i>
+                        Welcome Dashboard
+                    </h5>
+                </div>*@
+                <div class="card-body py-4 px-4">
+                    <div class="bg-gradient-light rounded p-4 border border-info">
+                        <!-- Welcome Message -->
+                        <div class="mb-4">
+                            <h3 class="font-weight-bold text-dark mb-2">
+                                <i class="fas fa-user-circle mr-2 text-primary"></i>
+                                Welcome @Session["FullName"]!
+                            </h3>
+                            <p class="text-muted mb-0">Material Science Lab Management System</p>
+                        </div>
+
+                        <!-- User Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-left-primary shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                    User ID
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    @Session["UserId"]
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-id-badge fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-left-success shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                    Role
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    @Session["UserRole"]
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-user-shield fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Information -->
+                        <div class="mb-4">
+                            <div class="alert alert-info border-left-info shadow" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <div class="mr-3">
+                                        <i class="fas fa-info-circle fa-2x"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-heading font-weight-bold">System Information</h6>
+                                        <p class="mb-1">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            All activities are monitored for security purposes.
+                                        </p>
+                                        <p class="mb-1">
+                                            <i class="fas fa-cog mr-1"></i>
+                                            Use the navigation menu to access system operations.
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-sign-out-alt mr-1"></i>
+                                            Always log out when leaving your workstation.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Notice -->
+                        <div class="mb-3">
+                            <div class="alert alert-warning border-left-warning shadow" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <div class="mr-3">
+                                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-heading font-weight-bold">Security Notice</h6>
+                                        <p class="mb-0">
+                                            If you are not <strong>@Session["UserId"]</strong> or do not agree with the system terms, 
+                                            please <a href="@Url.Action("Login", "Login")" class="alert-link">log out immediately</a>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="@Url.Action("Index", "IncomingData")" class="btn btn-primary">
+                                    <i class="fas fa-database mr-2"></i>Incoming Data
+                                </a>
+                                <a href="@Url.Action("Index", "Timeline")" class="btn btn-info">
+                                    <i class="fas fa-history mr-2"></i>Timeline
+                                </a>
+                                <button type="button" class="btn btn-secondary" onclick="showCurrentTime()">
+                                    <i class="fas fa-clock mr-2"></i>Current Time
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function showCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString();
+            
+            // Show in a nice toast or alert
+            if (typeof toastr !== 'undefined') {
+                toastr.info('Current Time: ' + timeString);
+            } else {
+                alert('Current Time: ' + timeString);
+            }
+        }
+
+        // Display welcome message with current date
+        $(document).ready(function() {
+            const now = new Date();
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            $('#welcomeMessage2').html(
+                '<i class="fas fa-calendar-day mr-2 text-muted"></i>' +
+                '<span class="text-muted">Today is ' + dateString + '</span>'
+            );
+        });
+    </script>
+}
+
+

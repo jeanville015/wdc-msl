@@ -1,0 +1,285 @@
+﻿.select2-hidden-accessible {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Sidebar Gradient - Logo Colors */
+.main-sidebar {
+    background: linear-gradient(90deg, #00e5d1 0%, #0066ff 100%) !important;
+}
+
+.main-sidebar .brand-link {
+    background: rgba(0, 0, 0, 0.1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.main-sidebar .brand-link .brand-text {
+    color: #fff !important;
+}
+
+/* Sidebar menu items */
+.main-sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.main-sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+.main-sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    color: #2d2d2d !important;
+    border-left: 4px solid #0066ff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    margin-left: 0 !important;
+    padding-left: calc(0.5rem - 4px) !important;
+}
+
+/* Sidebar menu icons */
+.main-sidebar .nav-icon {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.main-sidebar .nav-link:hover .nav-icon {
+    color: #fff !important;
+}
+
+.main-sidebar .nav-link.active .nav-icon {
+    color: #0066ff !important;
+}
+
+/* Sidebar treeview */
+.main-sidebar .nav-treeview > .nav-item > .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    padding-left: 2rem !important;
+}
+
+.main-sidebar .nav-treeview > .nav-item > .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+.main-sidebar .nav-treeview > .nav-item > .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    color: #2d2d2d !important;
+    border-left: 4px solid #0066ff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    margin-left: 0 !important;
+    padding-left: calc(2rem - 4px) !important;
+}
+
+.main-sidebar .nav-treeview > .nav-item > .nav-link.active .nav-icon {
+    color: #0066ff !important;
+}
+
+/* Global font size reduction */
+body {
+    font-size: 0.875rem !important; /* Reduce from default 1rem to 0.875rem */
+}
+
+.content-wrapper {
+    font-size: 0.875rem !important;
+}
+
+/* Reduce font sizes for headings */
+h1, h2, h3, h4, h5, h6 {
+    font-size: 0.9em !important;
+}
+
+/* Reduce table font sizes */
+.table {
+    font-size: 0.825rem !important;
+}
+
+.table th,
+.table td {
+    font-size: 0.825rem !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+/* Reduce form font sizes */
+.form-control {
+    font-size: 0.825rem !important;
+}
+
+.form-group label {
+    font-size: 0.825rem !important;
+}
+
+/* Reduce card font sizes */
+.card {
+    font-size: 0.875rem !important;
+}
+
+.card-header {
+    font-size: 0.875rem !important;
+}
+
+.card-body {
+    font-size: 0.875rem !important;
+}
+
+/* Reduce modal font sizes */
+.modal {
+    font-size: 0.875rem !important;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+    font-size: 0.875rem !important;
+}
+
+/* Reduce button font sizes */
+.btn {
+    font-size: 0.825rem !important;
+}
+
+/* Reduce sidebar font sizes further */
+.main-sidebar {
+    background-color: #0b43ba !important;
+}
+
+/* Fix icon spacing and text alignment for multiline sidebar items */
+.nav-sidebar .nav-link {
+    display: flex;
+    align-items: flex-start;
+    font-size: 13px !important; /* Reduced from 14px */
+    padding: 5px 10px !important; /* Reduced padding */
+}
+
+.nav-sidebar .nav-icon {
+    margin-top: 0.25rem; /* vertically center icon */
+    flex-shrink: 0;
+    width: 1.6rem; /* fixes space taken by icon */
+    text-align: center;
+    font-size: 14px !important; /* Reduced from 16px */
+}
+
+/*.nav-sidebar .nav-link p {
+    white-space: normal;
+    margin: 0;
+    line-height: 1.2;
+    padding-left: 0;*/ /* ensures no extra indent */
+/*}*/
+
+.brand-link {
+    border-bottom: none !important;
+    box-shadow: none !important; /* In case there's a shadow instead */
+}
+
+.custom-submenu .nav-link {
+    font-size: 0.8rem !important; /* Reduced from 0.85rem */
+    padding-left: 2rem; /* indent the link (adjust as needed) */
+}
+
+.custom-submenu .nav-icon {
+    font-size: 0.7rem !important; /* Reduced from 0.75rem */
+    margin-right: 0.5rem; /* optional spacing from text */
+}
+
+.nav-sidebar .menu-open > .nav-link {
+    background-color: #007bff !important; /* or any custom color */
+    color: #fff !important;
+}
+
+/* Reduce data table specific font sizes */
+.dataTables_wrapper {
+    font-size: 0.825rem !important;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    font-size: 0.8rem !important;
+}
+
+/* Reduce pagination font sizes */
+.page-link {
+    font-size: 0.8rem !important;
+    padding: 0.25rem 0.5rem !important;
+}
+
+/* Simple modal transitions - no conflicts */
+.modal .modal-content {
+    border: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/*multiple modal positioning fix*/
+/* Ensure previewModal is always on top of other modals */
+#previewModal {
+    z-index: 1060 !important;
+}
+
+    /* Ensure the backdrop for previewModal also moves up */
+    #previewModal + .modal-backdrop {
+        z-index: 1059 !important;
+    }
+
+/*---------sideBySideModal fixes and adjustments START--------*/
+/* Remove col-md-5 from the HTML and use this instead */
+.table-column-container {
+    width: 650px; /* Fixed width so it doesn't wrap */
+    min-width: 300px; /* Minimum width for smaller screens */
+    flex: 0 0 650px; /* Tells Flexbox: "Don't grow, don't shrink, stay 500px" */
+    background: white;
+}
+
+.analysis-table-wrapper {
+    width: 100%;
+    overflow-x: auto; /* The scrollbar trigger */
+}
+
+/* Force the table inside the partial to not wrap text */
+#modalTableRightBody table {
+    width: auto;
+    min-width: 100%;
+    white-space: nowrap;
+}
+
+/* Ensure the image column takes up all the leftover space */
+.col-md-7 {
+    flex: 1;
+}
+
+/* Fix for older browsers/Bootstrap 3 conflict */
+.row.g-0:before, .row.g-0:after {
+    display: none !important; /* Removes BS3 float clear fix which breaks flex */
+}
+/* Remove default padding from header so it aligns with p-0 body */
+#sideBySideModal .modal-header {
+    padding: 15px 20px; /* Adjust these numbers to your liking */
+    border-bottom: 1px solid #e5e5e5;
+    margin: 0; /* Ensures no weird shrinking */
+}
+
+/* Ensure the row inside the body doesn't have negative margins */
+#sideBySideModal .modal-body .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Optional: If the header still looks narrow, force it to 100% width */
+#sideBySideModal .modal-content {
+    overflow: hidden; /* Keeps the p-0 body from bleeding out of rounded corners */
+} 
+/*---------sideBySideModal fixes and adjustments END---------*/
+
+/*---------spinning loader in image loading on gridviews START---------*/
+.img-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa; /* Light gray placeholder background */
+}
+/*---------spinning loader in image loading on gridviews END---------*/

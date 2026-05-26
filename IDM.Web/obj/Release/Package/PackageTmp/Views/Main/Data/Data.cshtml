@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "Data";
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+            <table id="dataTable" class="table table-hover align-middle w-100">
+                <thead class="text-dark">
+                    <tr>
+                        <th>Delivery Date</th>
+                        <th>Received Date</th>
+                        <th>Lot Number</th>
+                        <th>Material No</th>
+                        <th>Material Name</th>
+                        <th>Job Number</th>
+                        <th>Tool Id</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">View Details</h5>
+                <button type="button" id="close-view" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Delivery Date</label>
+                            <p id="viewDeliveryDate" class="form-control-plaintext"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Received Date</label>
+                            <p id="viewReceivedDate" class="form-control-plaintext"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Material No</label>
+                            <p id="viewMaterialNo" class="form-control-plaintext"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Lot Number</label>
+                            <p id="viewLotNumber" class="form-control-plaintext"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Job Number</label>
+                            <p id="viewJobNumber" class="form-control-plaintext"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tool ID</label>
+                            <p id="viewToolId" class="form-control-plaintext"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="close-view-btn" class="btn btn-outline-secondary px-4">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dataModal" aria-modal="true" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title text-dark font-weight-semibold">Incoming Data Details</h5>
+                <button type="button" id="close-role" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+       
+            <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-end">
+                <button type="button" id="cancel-data" class="btn btn-outline-secondary px-4">
+                    Cancel
+                </button>
+                <button type="button" id="move-data" class="btn btn-primary px-4">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+       const AppUrls = {
+            getAllData: '@Url.Action("GetData", "Data", new { area = "Main" })',
+            getData: '@Url.Action("GetDataAsync", "Data", new { area = "Main" })',
+            editRole: '@Url.Action("Edit", "Role", new { area = "User" })',
+            deleteRole: '@Url.Action("Delete", "Role", new { area = "User" })'
+        };
+
+    </script>
+
+    <script src="~/Scripts/Main/data.js"></script>
+}

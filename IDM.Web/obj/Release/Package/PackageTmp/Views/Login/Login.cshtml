@@ -1,0 +1,106 @@
+@model IDM.Web.Models.LoginViewModel
+@{
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login | MSL</title>
+
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
+    <!-- AdminLTE & Plugins Styles -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/plugins/fontawesome-free/css/all.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/plugins/icheck-bootstrap/icheck-bootstrap.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/dist/css/adminlte.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/plugins/toastr/toastr.min.css")">
+    
+    <!-- Custom Login Styles -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/login/login.css")">
+</head>
+
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="card card-outline card-custom">
+            <div class="card-header text-center">
+                <a href="#" class="h1"><b>MSL</b></a>
+            </div>
+            <div class="card-body">
+                <p class="login-box-msg">Sign in to start your session</p>
+
+                <!-- Login Form --> 
+                @using (Html.BeginForm("Login", "Login", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { id = "formLogin" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <!-- Validation Summary -->
+                    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                    <!-- ViewData Error Message -->
+                    if (!string.IsNullOrEmpty(ViewData["ErrorMessage"] as string))
+                    {
+                        <div class="alert alert-danger text-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            @ViewData["ErrorMessage"]
+                        </div>
+                    }
+
+                    <div class="input-group mb-3">
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Username", type = "text" })
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <div class="input-group mb-3">
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password", value = "" })
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <!-- Login Button -->
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-custom btn-block"><span>Sign in</span></button>
+                        </div>
+                    </div>
+                }
+
+                @*<p class="mt-2 mb-1 text-center">
+            <a href="#">Forgot password?</a>
+        </p>*@
+            </div>
+        </div>
+    </div>
+
+    <script src="@Url.Content("~/Content/plugins/jquery/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Content/plugins/bootstrap/js/bootstrap.bundle.min.js")"></script>
+    <script src="@Url.Content("~/Content/js/adminlte.min.js")"></script>
+    <script src="@Url.Content("~/Content/plugins/toastr/toastr.min.js")"></script>
+
+    <script>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            @:toastr.error('@TempData["ErrorMessage"]');
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            @:toastr.success('@TempData["SuccessMessage"]');
+        }
+    </script>
+
+</body>
+</html>
