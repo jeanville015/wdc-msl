@@ -272,14 +272,14 @@ namespace IDM.Web.Controllers
         protected bool RejectedMail(string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver)
         {
             // Wrapper method for backward compatibility - delegates to EmailService
-            var result = _emailService.SendRejectionEmailAsync(analyzedBy, job, analysis, analysisTrial, status, approver).Result;
+            var result = _emailService.SendRejectionEmailAsync(null, analyzedBy, job, analysis, analysisTrial, status, approver).Result;
             return result;
         }
 
         protected bool ApproveMail(string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, string customer, string returnUrl)
         {
             // Wrapper method for backward compatibility - delegates to EmailService
-            var result = _emailService.SendApprovalEmailAsync(analyzedBy, job, analysis, analysisTrial, status, approver, customer, returnUrl).Result;
+            var result = _emailService.SendApprovalEmailAsync(null,analyzedBy, job, analysis, analysisTrial, status, approver, customer, returnUrl).Result;
             return result;
         }
 
