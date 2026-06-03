@@ -31,7 +31,8 @@ namespace IDM.Repository.Main.Repository
             {
                 try
                 {
-                    var sql = $"SELECT * FROM {table} WHERE AmethystJob = @amethystJob AND Analysis = @analysis AND AnalysisTrial = @analysisTrial";
+                    var safeTable = FormatSqlIdentifier(table, nameof(table));
+                    var sql = $"SELECT * FROM {safeTable} WHERE AmethystJob = @amethystJob AND Analysis = @analysis AND AnalysisTrial = @analysisTrial";
                     
                     // Get dynamic data first
                     var dynamicData = await connection.QueryAsync(sql, new { amethystJob, analysis, analysisTrial });
@@ -57,7 +58,8 @@ namespace IDM.Repository.Main.Repository
             {
                 try
                 {
-                    var sql = $"SELECT * FROM {table} " +
+                    var safeTable = FormatSqlIdentifier(table, nameof(table));
+                    var sql = $"SELECT * FROM {safeTable} " +
                         $"WHERE AmethystJob = @amethystJob " +
                         $"AND Analysis = @analysis " +
                         $"AND AnalysisTrial = @analysisTrial " +
@@ -88,7 +90,8 @@ namespace IDM.Repository.Main.Repository
             {
                 try
                 {
-                    var sql = $"SELECT * FROM {table} " +
+                    var safeTable = FormatSqlIdentifier(table, nameof(table));
+                    var sql = $"SELECT * FROM {safeTable} " +
                         $"WHERE AmethystJob = @amethystJob " +
                         $"AND Analysis = @analysis " +
                         $"AND AnalysisTrial = @analysisTrial " +
@@ -120,7 +123,8 @@ namespace IDM.Repository.Main.Repository
             {
                 try
                 {
-                    var sql = $"SELECT * FROM {table} WHERE AmethystJob = @amethystJob AND Analysis = @analysis AND AnalysisTrial = @analysisTrial";
+                    var safeTable = FormatSqlIdentifier(table, nameof(table));
+                    var sql = $"SELECT * FROM {safeTable} WHERE AmethystJob = @amethystJob AND Analysis = @analysis AND AnalysisTrial = @analysisTrial";
 
                     // Get dynamic data first
                     var dynamicData = await connection.QueryAsync(sql, new { amethystJob, analysis, analysisTrial });
@@ -146,7 +150,8 @@ namespace IDM.Repository.Main.Repository
             {
                 try
                 {
-                    var sql = $"SELECT * FROM {table} WHERE AmethystJob = @amethystJob AND Analysis = @analysis AND AnalysisTrial = @analysisTrial";
+                    var safeTable = FormatSqlIdentifier(table, nameof(table));
+                    var sql = $"SELECT * FROM {safeTable} WHERE AmethystJob = @amethystJob AND Analysis = @analysis AND AnalysisTrial = @analysisTrial";
 
                     // Get dynamic data first
                     var dynamicData = await connection.QueryAsync(sql, new { amethystJob, analysis, analysisTrial });
@@ -210,10 +215,14 @@ namespace IDM.Repository.Main.Repository
             {
                 try
                 {
+                    var safeTable = FormatSqlIdentifier(Table, nameof(Table));
+                    var safeDataName = FormatSqlIdentifier(_DataNameValuePair.DataName, nameof(_DataNameValuePair.DataName));
+                    var safeIdName = FormatSqlIdentifier(_DataIdValuePair.IdName, nameof(_DataIdValuePair.IdName));
+
                     var updateSql = $@"
-                        UPDATE {Table} 
-                        SET {_DataNameValuePair.DataName} = @DataValue
-                        WHERE {_DataIdValuePair.IdName} = @IdValue";
+                        UPDATE {safeTable}
+                        SET {safeDataName} = @DataValue
+                        WHERE {safeIdName} = @IdValue";
 
                     var updateResult = await connection.ExecuteAsync(updateSql, new
                     {
@@ -321,24 +330,50 @@ namespace IDM.Repository.Main.Repository
             {
                 try
                 {
-                    var sql = $"SELECT [U_List].[USER_ID]" +
-                        $"FROM [USER_ANALYSIS] [U_Analysis] " +
-                        $"INNER JOIN [USER_LIST] U_List ON [U_Analysis].[USER_ID] = U_List.[ID]" +
-                        $"INNER JOIN [MAINT_Analysis] [M_Analysis] ON  [U_Analysis].[MAINT_ANALYSIS_ID] = [M_Analysis].[AnalysisId]" +
-                        $"WHERE [M_Analysis].[AnalysisName] = @analysisName";
+                    var sql = @"
+                        SELECT [U_List].[USER_ID]
+                        FROM [USER_ANALYSIS] AS [U_Analysis]
+                        INNER JOIN [USER_LIST] AS [U_List] ON [U_Analysis].[USER_ID] = [U_List].[ID]
+                        INNER JOIN [MAINT_Analysis] AS [M_Analysis] ON [U_Analysis].[MAINT_ANALYSIS_ID] = [M_Analysis].[AnalysisId]
+                        WHERE [M_Analysis].[AnalysisName] = @analysisName";
 
-                    // Get dynamic data first
-                    var dynamicData = await connection.QueryAsync(sql, new { analysisName });
-
-                    // Convert dynamicData to List<String> object
-                    var result = dynamicData.Select(x => (string)x.USER_ID).ToList(); 
-                    return result;
+                    return (await connection.QueryAsync<string>(sql, new { analysisName })).ToList();
                 }
                 catch (Exception ex)
                 {
                     throw;
                 }
             }
+        }
+
+        private static string FormatSqlIdentifier(string identifier, string argumentName)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                throw new ArgumentException("SQL identifier cannot be empty.", argumentName);
+            }
+
+            var parts = identifier.Split('.');
+            if (parts.Length > 2)
+            {
+                throw new ArgumentException("SQL identifier cannot contain more than one schema separator.", argumentName);
+            }
+
+            return string.Join(".", parts.Select(part =>
+            {
+                var trimmed = part.Trim();
+                if (trimmed.StartsWith("[") && trimmed.EndsWith("]") && trimmed.Length > 2)
+                {
+                    trimmed = trimmed.Substring(1, trimmed.Length - 2);
+                }
+
+                if (trimmed.Length == 0 || trimmed.Any(c => !(char.IsLetterOrDigit(c) || c == '_')))
+                {
+                    throw new ArgumentException($"Invalid SQL identifier: {identifier}", argumentName);
+                }
+
+                return $"[{trimmed}]";
+            }));
         }
 
     }

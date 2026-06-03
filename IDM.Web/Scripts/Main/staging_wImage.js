@@ -156,6 +156,12 @@ var StagingModule = (function () {
                 type: 'GET',
                 data: { analysisName: params.analysis },
                 success: function (response) {
+                    if (!response) {
+                        ToastrHelper.notification("error", "No analysis setup found for: " + params.analysis, "Error");
+                        reject("No analysis setup found");
+                        return;
+                    }
+
                     const sourceTable = response.sourceTable || response.tableName || response.table;
                     const destinationTable = response.destinationTable || null;
                     
@@ -363,6 +369,12 @@ var StagingModule = (function () {
                     data: { analysisName: params.analysis },
                     success: function (response) {
 
+                        if (!response) {
+                            ToastrHelper.notification("error", "No analysis setup found for: " + params.analysis, "Error");
+                            reject("No analysis setup found");
+                            return;
+                        }
+
                         const sourceTable_ = response.sourceTable || response.tableName || response.table;
                         const destinationTable = response.destinationTable || null;
 
@@ -405,7 +417,7 @@ var StagingModule = (function () {
                                     //$("#loadingOverlay").fadeOut();
                                 },
                                 error: function (xhr, status, error) {
-                                    console.log(dataResponse);
+                                    console.error("Approval request failed:", xhr.responseText || error);
                                     ToastrHelper.notification("error", "Error fetching staging data: " + error, "Error");
                                     reject(error);
                                     //// Hide overlay after request finishes (success or error)

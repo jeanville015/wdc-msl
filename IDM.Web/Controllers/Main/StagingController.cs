@@ -125,7 +125,12 @@ namespace IDM.Web.Controllers.Main
                 }, JsonRequestBehavior.AllowGet);
             } 
 
-            var data = await _dynamicStagingService.GetByJobAndAnalysisAsync(table, amethystJob, analysis, analysisTrial);
+            var data = (await _dynamicStagingService.GetByJobAndAnalysisAsync(table, amethystJob, analysis, analysisTrial)).ToList();
+            if (!data.Any())
+            {
+                return Content("<div class=\"alert alert-warning mb-0\">No staging data found.</div>");
+            }
+
             var first = data.First();
             var staticFields = new[] { "AmethystJob", "Analysis", "AnalysisTrial", "LotNumber", "DateAnalyzed", "AnalyzedBy", "DateReviewed", "ReviewedBy", "Tool", "SampleSequence" };
 
@@ -171,7 +176,12 @@ namespace IDM.Web.Controllers.Main
 
         public async Task<ActionResult> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea)
         {
-           var data = await _dynamicStagingService.GetDataStagingDefectAsync(table, amethystJob, analysis, analysisTrial, area, subArea);
+           var data = (await _dynamicStagingService.GetDataStagingDefectAsync(table, amethystJob, analysis, analysisTrial, area, subArea)).ToList();
+           if (!data.Any())
+           {
+               return Content("<div class=\"alert alert-warning mb-0\">No defect data found.</div>");
+           }
+
            var first = data.First();
            var staticFields = new[] { "AmethystJob", "Analysis", "AnalysisTrial", "Area", "SubArea"};
 
@@ -211,20 +221,23 @@ namespace IDM.Web.Controllers.Main
         /// <param name="status">PASSED</param>
         /// <param name="tableContent"></param> 
         /// <returns></returns>
+        [HttpPost]
         public async Task<JsonResult> SetApproval(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent)
         {
 
-            var ExecuteBDPRequirementsProcessResult = new OperationResult();
-
             try
             {
+                if (status != "PASSED" && status != "REJECTED")
+                {
+                    return Json(new { success = false, message = "Invalid approval status." }, JsonRequestBehavior.AllowGet);
+                }
+
                 var config = GetConfiguration();
 
                 // Deserialize table content from JSON string
-                var tableData = JsonConvert.DeserializeObject<TableData>(tableContent);
-
-                ////var tableData = await _dynamicStagingService.GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-                //var result = await _dynamicStagingService.SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, UserId);
+                var tableData = string.IsNullOrWhiteSpace(tableContent)
+                    ? new TableData { Columns = new List<string>(), Data = new List<List<string>>() }
+                    : JsonConvert.DeserializeObject<TableData>(tableContent);
 
                 analyzedBy = SanitizeAdUserId(analyzedBy);
                 var result = await _dynamicStagingService.ProcessApprovalWithNotificationAsync(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableData, UserId, config); 
@@ -242,35 +255,20 @@ namespace IDM.Web.Controllers.Main
             }
         }
 
+        [HttpPost]
         public async Task<JsonResult> SetApproval_StagingWImage(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string returnUrl)
         {
             // PROCESS NOT READY
             //return Json(new { success = false, message = "This Feature/Process is under development!"}, JsonRequestBehavior.AllowGet); 
 
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
-            //if (status == "REJECTED")
-            //{
-            //    var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId);
-            //}
-            //else //status == "APPROVED"
-            //{
-
-            //    OperationResult ORsetApprovalStagingWImage = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId);
-            //    if (ORsetApprovalStagingWImage.OperationStatus == false)
-            //    {
-            //        return Json(new { success = false, message = "Error processing approval: " + ORsetApprovalStagingWImage.OperationStatusMessage }, JsonRequestBehavior.AllowGet);
-            //    }
-
-            //    var customer = await _dynamicStagingService.GetCustomerAsync(amethystJob, analysis, analysisTrial);
-            //    var resultEmailSendApprovalEmail = _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, UserId, customer, returnUrl).Result;
-            //}
 
             try
             {
-                var config = GetConfiguration();
-
-                ////var tableData = await _dynamicStagingService.GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-                //var result = await _dynamicStagingService.SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, UserId);
+                if (status != "PASSED" && status != "REJECTED")
+                {
+                    return Json(new { success = false, message = "Invalid approval status." }, JsonRequestBehavior.AllowGet);
+                }
 
                 // will removed the unnecessary 'Ad/' on the value
                 analyzedBy = SanitizeAdUserId(analyzedBy);

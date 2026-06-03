@@ -94,39 +94,6 @@ namespace IDM.Service.Main.Service
         {
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
 
-            //CODE CLEANUP------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            ////////////////////////////try
-            ////////////////////////////{
-            ////////////////////////////    //--lines with (--) on the start, disable/bypass for now to give way to new logic QA
-            ////////////////////////////    var resultSetApproval = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
-
-            ////////////////////////////    if (status == "REJECTED")
-            ////////////////////////////    {
-            ////////////////////////////        //--var resultEmailSendRejectionEmail = _emailService.SendRejectionEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId).Result;
-            ////////////////////////////    }
-            ////////////////////////////    else
-            ////////////////////////////    {
-            ////////////////////////////        //Note: MQ input execution---------------------------------------------------------------------------------------------------------
-            ////////////////////////////        DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-            ////////////////////////////        OperationResult MainTableMQInput = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId); 
-            ////////////////////////////        DataTable dataTableDefect = await GetDataStagingDefectDataTableAsync("DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial, null, null);
-            ////////////////////////////        OperationResult DefectTableMQInput = await PrepareMQInputDataTable(dataTableDefect, "DATA_STAGING_DEFECT", "DEFECTIDM", userId);
-            ////////////////////////////        //---------------------------------------------------------------------------------------------------------------------------------
-
-            ////////////////////////////        OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial);
-
-            ////////////////////////////        var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
-            ////////////////////////////        //--var resultEmailSendApprovalEmail = _emailService.SendApprovalEmailAsync(analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer).Result;
-            ////////////////////////////    }
-            ////////////////////////////}
-            ////////////////////////////catch (Exception ex)
-            ////////////////////////////{
-            ////////////////////////////    result.OperationStatus = false;
-            ////////////////////////////    result.OperationStatusMessage = ex.Message;
-            ////////////////////////////    return result;
-            ////////////////////////////}  
-            ////////////////////////////return result;
-
             bool setItemStatus = true;
             setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
             if (setItemStatus == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Updating of the item status was unsuccessful" }; }
@@ -165,7 +132,7 @@ namespace IDM.Service.Main.Service
 
                 var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
-                var resultEmailSendApproveEmail = _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl).Result;
+                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl);
                 if (resultEmailSendApproveEmail)
                 {
                     result.OperationStatus = true;
@@ -205,7 +172,7 @@ namespace IDM.Service.Main.Service
 
                 if (!mqResult.OperationStatus)
                 {
-                    return new OperationResult { OperationStatus = false, OperationStatusMessage = "Error uploading on MQ" };
+                    return mqResult;
                 }
 
                 // 3. Approval email
@@ -439,9 +406,24 @@ namespace IDM.Service.Main.Service
 
                 //var config = ConfigFactory.GetMqConfiguration(); 
 
+                if (dataTable == null)
+                {
+                    return new OperationResult { OperationStatus = false, OperationStatusMessage = "No MQ data available for " + sourceTable };
+                }
+
+                if (dataTable.Rows.Count == 0)
+                {
+                    return new OperationResult { OperationStatus = false, OperationStatusMessage = "No MQ rows available for " + sourceTable };
+                }
+
                 string primaryKeyIdLabel = FormatDataName(sourceTable);
-                excludedFields.Append(primaryKeyIdLabel);
-                foreach (var field in excludedFields)
+                var fieldsToExclude = (excludedFields ?? Enumerable.Empty<string>())
+                    .Concat(new[] { primaryKeyIdLabel })
+                    .Where(field => !string.IsNullOrWhiteSpace(field))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                foreach (var field in fieldsToExclude)
                 {
                     if (dataTable.Columns.Contains(field))
                     {
@@ -562,7 +544,7 @@ namespace IDM.Service.Main.Service
                         _DataNameValuePair = new DataNameValuePair
                         {
                             DataName = "BDPAnnotationPath",
-                            DataValue = urlBase + imageExtracted
+                            DataValue = urlBase + annoExtracted
                         },
                         OriginFileDirectory = annoPath,
                         FileDirectory = commonDir,
@@ -650,6 +632,14 @@ namespace IDM.Service.Main.Service
                 OperationResult ProcessBDPUpload_DataStagingMain_Annotation = await ProcessBDPUpload(StagingWImageMainBDPDirectories_Annotation);
                 OperationResult ProcessBDPUpload_DataStagingDefect_Sem = await ProcessBDPUpload(StagingWImageDetailsBDPDirectories_Sem);
                 OperationResult ProcessBDPUpload_DataStagingDefect_Edx = await ProcessBDPUpload(StagingWImageDetailsBDPDirectories_Edx);
+                var failedUploadResult = new[]
+                {
+                    ProcessBDPUpload_DataStagingMain_Image,
+                    ProcessBDPUpload_DataStagingMain_Annotation,
+                    ProcessBDPUpload_DataStagingDefect_Sem,
+                    ProcessBDPUpload_DataStagingDefect_Edx
+                }.FirstOrDefault(uploadResult => !uploadResult.OperationStatus);
+                if (failedUploadResult != null) { return failedUploadResult; }
 
                 /*---------------------------------------------------------------------------------------               
                 3. formulate http url and use that value to update the related BDP urls in database for:
@@ -666,6 +656,14 @@ namespace IDM.Service.Main.Service
                 OperationResult UpdateDataStagingMainAnnotation = await ProcessDataStagingDataUpdate(StagingWImageMainBDPDirectories_Annotation, sourceTable);
                 OperationResult UpdateDataStagingDefectSem = await ProcessDataStagingDataUpdate(StagingWImageDetailsBDPDirectories_Sem, "DATA_STAGING_DEFECT");
                 OperationResult UpdateDataStagingDefectEdx = await ProcessDataStagingDataUpdate(StagingWImageDetailsBDPDirectories_Edx, "DATA_STAGING_DEFECT");
+                var failedUpdateResult = new[]
+                {
+                    UpdateDataStagingMainImage,
+                    UpdateDataStagingMainAnnotation,
+                    UpdateDataStagingDefectSem,
+                    UpdateDataStagingDefectEdx
+                }.FirstOrDefault(updateResult => !updateResult.OperationStatus);
+                if (failedUpdateResult != null) { return failedUpdateResult; }
 
                 result.OperationStatus = true;
                 result.OperationStatusMessage = "Success";
@@ -686,12 +684,34 @@ namespace IDM.Service.Main.Service
         /// <param name="uploadList"></param>
         private async Task<OperationResult> ProcessBDPUpload(List<BDPUploadVariables> uploadList)
         {
-            OperationResult result = new OperationResult();
+            OperationResult result = new OperationResult
+            {
+                OperationStatus = true,
+                OperationStatusMessage = "BDP upload successful"
+            };
 
             foreach (var item in uploadList)
             {
                 try
                 {
+                    if (string.IsNullOrWhiteSpace(item.OriginFileDirectory))
+                    {
+                        return new OperationResult
+                        {
+                            OperationStatus = false,
+                            OperationStatusMessage = $"Source file path is empty for {item._DataNameValuePair.DataName}."
+                        };
+                    }
+
+                    if (!System.IO.File.Exists(item.OriginFileDirectory))
+                    {
+                        return new OperationResult
+                        {
+                            OperationStatus = false,
+                            OperationStatusMessage = $"Source file not found: {item.OriginFileDirectory}"
+                        };
+                    }
+
                     // Use System.IO.Directory to avoid controller naming conflicts
                     if (!System.IO.Directory.Exists(item.FileDirectory))
                     {
@@ -701,19 +721,19 @@ namespace IDM.Service.Main.Service
                     string destinationPath = System.IO.Path.Combine(item.FileDirectory, item.ExtractedFileName);
 
                     // Use System.IO.File to specifically target the IO class
-                    if (System.IO.File.Exists(item.OriginFileDirectory))
-                    {
-                        System.IO.File.Copy(item.OriginFileDirectory, destinationPath, true);
-                    }
+                    System.IO.File.Copy(item.OriginFileDirectory, destinationPath, true);
 
                     result.OperationStatus = true;
                 }
                 catch (Exception ex)
                 {
-                    result.OperationStatus = false;
-                    result.OperationStatusMessage = ex.Message;
                     // Log error (e.g., using your local logging service)
                     Console.WriteLine($"IO Error: {ex.Message}");
+                    return new OperationResult
+                    {
+                        OperationStatus = false,
+                        OperationStatusMessage = ex.Message
+                    };
                 }
             }
 
@@ -726,17 +746,32 @@ namespace IDM.Service.Main.Service
         /// <param name="uploadList"></param>
         private async Task<OperationResult> ProcessDataStagingDataUpdate(List<BDPUploadVariables> uploadList, string Table)
         {
-            OperationResult operationResult = new OperationResult();
+            OperationResult operationResult = new OperationResult
+            {
+                OperationStatus = true,
+                OperationStatusMessage = "Data staging update successful"
+            };
             foreach (var item in uploadList)
             {
                 try
                 {
-                    operationResult.OperationStatus = await UpdateStagingDataValueAsync(Table, item._DataIdValuePair, item._DataNameValuePair);
+                    var updated = await UpdateStagingDataValueAsync(Table, item._DataIdValuePair, item._DataNameValuePair);
+                    if (!updated)
+                    {
+                        return new OperationResult
+                        {
+                            OperationStatus = false,
+                            OperationStatusMessage = $"No rows updated for {Table}.{item._DataNameValuePair.DataName} with {item._DataIdValuePair.IdName}={item._DataIdValuePair.IdValue}."
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
-                    operationResult.OperationStatus = false;
-                    operationResult.OperationStatusMessage = ex.Message;
+                    return new OperationResult
+                    {
+                        OperationStatus = false,
+                        OperationStatusMessage = ex.Message
+                    };
                 }
 
             }

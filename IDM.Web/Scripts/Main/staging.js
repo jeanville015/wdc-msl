@@ -161,6 +161,12 @@ var StagingModule = (function () {
                 type: 'GET',
                 data: { analysisName: params.analysis },
                 success: function (response) {
+                    if (!response) {
+                        ToastrHelper.notification("error", "No analysis setup found for: " + params.analysis, "Error");
+                        reject("No analysis setup found");
+                        return;
+                    }
+
                     const sourceTable = response.sourceTable || response.tableName || response.table;
                     const destinationTable = response.destinationTable || null;
                     
@@ -205,25 +211,23 @@ var StagingModule = (function () {
                                     const $infoContainer = $('#headerInfoContainer');
                                     $infoContainer.empty();
 
-                                    //set the header label
                                     $('#AnalysisName').text(response.analysisName);
 
-                                    let infoHtml = '<div class="row m-2 p-2 border bg-light">';
+                                    // Add gutter class to the container row directly
+                                    $infoContainer.addClass('g-2 p-2 border bg-light');
+
                                     headerColumns.forEach(col => {
-                                        // Skip the AnalysisTrial column entirely
-                                        if (col === "AnalysisTrial") {
-                                            return;
-                                        }
+                                        if (col === "analysisTrial") return;
+
                                         let val = getCellValue(firstRow, col) || 'N/A';
-                                        val = formatDateValue(val, col)
-                                        infoHtml += `
-                                            <div class="col col-auto">
+                                        val = formatDateValue(val, col);
+
+                                        $infoContainer.append(`
+                                            <div class="col-auto">
                                                 <strong>${col.toUpperCase()}:</strong>
                                                 <span>${val}</span>
-                                            </div>`;
+                                            </div>`);
                                     });
-                                    infoHtml += '</div>';
-                                    $infoContainer.append(infoHtml);
 
                                     // 4. REMOVE the first 5 columns from the array so the table doesn't see them
                                     const tableColumns = columns.slice(8);
@@ -341,6 +345,12 @@ var StagingModule = (function () {
                 data: { analysisName: params.analysis },
                 success: function (response) {
 
+                    if (!response) {
+                        ToastrHelper.notification("error", "No analysis setup found for: " + params.analysis, "Error");
+                        reject("No analysis setup found");
+                        return;
+                    }
+
                     const sourceTable_ = response.sourceTable || response.tableName || response.table;
                     const destinationTable = response.destinationTable || null; 
 
@@ -373,7 +383,7 @@ var StagingModule = (function () {
                                 }
                             },
                             error: function (xhr, status, error) {
-                                console.log(dataResponse); 
+                                console.error("Approval request failed:", xhr.responseText || error);
                                 ToastrHelper.notification("error", "Error fetching staging data: " + error, "Error");
                                 reject(error);
                             }
