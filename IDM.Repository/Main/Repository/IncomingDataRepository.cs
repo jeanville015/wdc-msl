@@ -37,7 +37,7 @@ namespace IDM.Repository.Main.Repository
                        VISUAL_APPEARANCE_CHECK, PACKAGING_DOCUMENT_CHECK, PARAMETER_NAME, UOM_NAME,
                        SITE_NAME, PARAMETER_VALUE, LOWER_SPECS_LIMIT, UPPER_SPECS_LIMIT, JUDGEMENT,
                        LOWER_CONTROL_LIMIT, UPPER_CONTROL_LIMIT, CONTROL_JUDGEMENT, REMARKS, RECEIVEDBY,
-                       StoreBy, StoreTs)
+                       StoreBy, StoreTs, STATUS)
                       VALUES 
                       (@material_No, @material_Name, @lotNumber, @area_Name, @supplier_Name, @manufacturer_Name,
                        @delivery_Date, @received_Date, @manufacturing_Date, @expiration_Date, @inspection_Date,
@@ -45,7 +45,7 @@ namespace IDM.Repository.Main.Repository
                        @visual_Appearance_Check, @packaging_Document_Check, @parameter_Name, @uom_Name,
                        @site_Name, @parameter_Value, @lower_Specs_Limit, @upper_Specs_Limit, @judgement,
                        @lower_Control_Limit, @upper_Control_Limit, @control_Judgement, @remarks, @receivedBy,
-                       @storedBy, @storeTs);
+                       @storedBy, @storeTs, @status);
                       SELECT CAST(SCOPE_IDENTITY() as int)";
 
                         var parameters = new
@@ -86,7 +86,8 @@ namespace IDM.Repository.Main.Repository
                             remarks = incomingData.Remarks,
                             receivedBy = incomingData.ReceivedBy,
                             storedBy = incomingData.StoredBy,
-                            storeTs = incomingData.StoreTs
+                            storeTs = incomingData.StoreTs,
+                            status = "PENDING"
                         };
 
                         insertedId = await connection.ExecuteScalarAsync<int>(sql, parameters);

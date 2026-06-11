@@ -89,17 +89,13 @@ var PendingModule = (function () {
 
     function bindEvents() {
         $(document).on('click', '#reject-btn', function (e) {
-            e.preventDefault();
-
-            const status = 'REJECTED';
-            approvalFunction(status)
+            e.preventDefault(); 
+            SetStatusDecision('REJECTED');
         });
 
         $(document).on('click', '#approve-btn', function (e) {
-            e.preventDefault();
-
-            const status = 'PASSED';
-            approvalFunction(status)
+            e.preventDefault(); 
+            SetStatusDecision('PASSED');
         });
 
         // NEW — share icon click
@@ -168,6 +164,57 @@ function loadPendingData(page, pageSize) {
 }
 function loadShareDetails(page, pageSize) {
     PendingModule.loadShareDetails(page, pageSize);
+}
+
+function SetStatusDecision(status, lotNumber) { 
+    $.ajax({
+        url: AppUrls.setStatusDecision,
+        type: 'POST',
+        data: {
+            status: status,
+            lotNumber: shareParams.lotNumber,
+            deliveryDate: shareParams.deliveryDate,
+            receivedDate: shareParams.receivedDate,
+            materialNo: shareParams.materialNo,
+            jobNumber: shareParams.jobNumber,
+            toolId: shareParams.toolId
+        },
+        success: function (response) {
+            if (!response || response.success !== true) {
+                ToastrHelper.notification(
+                    "error",
+                    response?.message || "Unable to update the status.",
+                    "Error"
+                );
+
+                $buttons.prop('disabled', false).removeClass('disabled');
+                return;
+            }
+
+            ToastrHelper.notification(
+                "success",
+                response.message,
+                "Success"
+            );
+
+            //modal close and grid-view refresh -------------------//
+            const $modal = $('#shareModal'); 
+            $modal.one('hidden.bs.modal', function () {
+                loadPendingData(1, 10);
+            });
+            $modal.modal('hide');
+            // ---------------------------------------------------//
+        },
+        error: function (xhr) {
+            const message =
+                xhr.responseJSON?.message ||
+                "An error occurred while updating the status.";
+
+            ToastrHelper.notification("error", message, "Error");
+
+            $buttons.prop('disabled', false).removeClass('disabled');
+        }
+    });
 }
 
 $(document).ready(function () {

@@ -85,5 +85,10 @@ namespace IDM.Service.Main.Service
             var data = await _pendingDataRepository.GetPendingDataAsync();
             return _Mapper.Map<IEnumerable<PendingDataDTO>>(data);
         }
+
+        public async Task<int> UpdateDataParameterDetails(string status, string lotNumber, string deliveryDate, string receivedDate, string materialNo, string jobNumber, string toolId)
+        {
+            return await _pendingDataRepository.UpdateDataParameterDetails(status, lotNumber, deliveryDate, receivedDate, materialNo, jobNumber, toolId);
+        }
     }
 }

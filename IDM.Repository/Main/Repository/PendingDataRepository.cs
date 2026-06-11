@@ -157,5 +157,57 @@ namespace IDM.Repository.Main.Repository
                 }
             }
         }
+
+        public async Task<int> UpdateDataParameterDetails(string status, string lotNumber, string deliveryDate, string receivedDate, string materialNo, string jobNumber, string toolId)
+        //(string deliveryDate, string receivedDate, string lotNumber, string materialNo, string jobNumber, string toolId,
+        {
+            var dateFormats = new[]
+            {
+                "MM/dd/yyyy HH:mm:ss",
+                "yyyy-MM-dd"
+            };
+
+            //if (!DateTime.TryParseExact( deliveryDate, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDeliveryDate))
+            //{
+            //    throw new ArgumentException("Invalid delivery date.");
+            //}
+
+            //if (!DateTime.TryParseExact( receivedDate, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedReceivedDate))
+            //{
+            //    throw new ArgumentException("Invalid received date.");
+            //} 
+
+            //parse date string to correct format yyyy-mm-dd
+            DateTime dtDeliveryDate = DateTime.ParseExact(deliveryDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            DateTime dtReceivedDate = DateTime.ParseExact(receivedDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            string strDeliveryDate = dtDeliveryDate.ToString("yyyy-MM-dd");
+            string strReceivedDate = dtReceivedDate.ToString("yyyy-MM-dd");
+
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                var sql = @"
+                            UPDATE [IDM].[dbo].[DATA_PARAMETER_DETAILS]
+                            SET [STATUS] = @Status
+                            WHERE [STATUS] = 'PENDING'
+                                  AND (@DeliveryDate = '' OR [DELIVERY_DATE] = @DeliveryDate)
+                                  AND (@ReceivedDate = '' OR [RECEIVED_DATE] = @ReceivedDate)
+                                  AND (@LotNumber    = '' OR [LOTNUMBER]     = @LotNumber)
+                                  AND (@MaterialNo   = '' OR [MATERIAL_NO]    = @MaterialNo)
+                                  AND (@JobNumber    = '' OR [JOB_NUMBER]     = @JobNumber)
+                                  AND (@ToolId       = '' OR [TOOLID]         = @ToolId);";
+
+                return await connection.ExecuteAsync(sql, new
+                {
+                    Status = status,
+                    LotNumber = lotNumber,
+                    DeliveryDate = strDeliveryDate,
+                    ReceivedDate = strReceivedDate,
+                    MaterialNo = materialNo,
+                    JobNumber = jobNumber,
+                    ToolId = toolId
+                });
+            }
+        }
+
     }
 }

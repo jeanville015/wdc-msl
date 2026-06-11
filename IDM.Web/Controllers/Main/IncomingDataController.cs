@@ -40,7 +40,8 @@ namespace IDM.Web.Controllers.Main
             if (id == -1)
                 return Json(new { success = false, message = "This Incoming Data already exists. Please try another Area." });
 
-            // Get MQ configuration
+            // transfer this block to APPROVE logic------------------------------------------------------------------------//
+            // Get MQ configuration 
             var config = GetConfiguration();
             //PDBAXLib.PdbClass PDB = new PDBAXLib.PdbClass();
             // Upload parameters to MQ
@@ -52,6 +53,7 @@ namespace IDM.Web.Controllers.Main
             var trialResult = await _incomingDataService.MQUploadPreparationTrial(incomingDataDTO, config);
             if (trialResult == -1)
                 return Json(new { success = false, message = "MQ upload failed for Trial table." });
+            //-------------------------------------------------------------------------------------------------------------//
 
             // Send email if any parameter failed or is out of control
             if (incomingDataDTO.Parameters.Any(p => 

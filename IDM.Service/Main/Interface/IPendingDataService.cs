@@ -10,5 +10,6 @@ namespace IDM.Service.Main.Interface
         Task<PagedResultDTO<PendingDataDTO>> GetAllAsync(int page, int pageSize);
         Task<PagedResultDTO<PendingDataDTO>> GetPendingDataDetailsAsync(string deliveryDate, string receivedDate, string lotNumber, string materialNo, string jobNumber, string toolId, int page, int pageSize);
         Task<IEnumerable<PendingDataDTO>> GetPendingDataAsync();
+        Task<int> UpdateDataParameterDetails(string status, string lotNumber, string deliveryDate, string receivedDate, string materialNo, string jobNumber, string toolId);
     }
 }
