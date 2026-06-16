@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace IDM.Repository.Main.Repository
 {
@@ -38,9 +39,53 @@ namespace IDM.Repository.Main.Repository
         //    }
         //}
 
-        public async Task<(IEnumerable<PendingData> Items, int TotalCount)> GetPendingDataDetailsAsync(string deliveryDate, string receivedDate, string lotNumber, string materialNo, string jobNumber, string toolId, int page, int pageSize)
+        public async Task<IEnumerable<PendingData>> GetPendingDataDetailsAsync(string deliveryDate, string receivedDate, string lotNumber, string materialNo, string jobNumber, string toolId)
         {
+            // Parse date strings to DateTime objects
+            DateTime dtDeliveryDate = DateTime.ParseExact(deliveryDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            DateTime dtReceivedDate = DateTime.ParseExact(receivedDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            string strDeliveryDate = dtDeliveryDate.ToString("yyyy-MM-dd");
+            string strReceivedDate = dtReceivedDate.ToString("yyyy-MM-dd");
 
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                try
+                { 
+                    var sql = new StringBuilder("SELECT * FROM [IDM].[DBO].[DATA_PARAMETER_DETAILS] WHERE [STATUS]='PENDING'");
+                    var parameters = new DynamicParameters();
+
+
+                    sql.Append(" AND [DELIVERY_DATE] = @DeliveryDate");
+                    parameters.Add("DeliveryDate", strDeliveryDate, DbType.String);
+
+                    sql.Append(" AND [RECEIVED_DATE] = @ReceivedDate");
+                    parameters.Add("ReceivedDate", strReceivedDate, DbType.String);
+
+                    // Append string filters
+                    sql.Append(" AND [LOT_NUMBER] = @LotNumber");
+                    parameters.Add("LotNumber", lotNumber, DbType.String);
+
+                    sql.Append(" AND [MATERIAL_NO] = @MaterialNo");
+                    parameters.Add("MaterialNo", materialNo, DbType.String);
+
+                    sql.Append(" AND [JOB_NUMBER] = @JobNumber");
+                    parameters.Add("JobNumber", jobNumber, DbType.String);
+
+                    sql.Append(" AND [TOOL_ID] = @ToolId");
+                    parameters.Add("ToolId", toolId, DbType.String);
+
+                    return await connection.QueryAsync<PendingData>(sql.ToString(), parameters);
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or handle it appropriately
+                    throw;
+                }
+            }
+        }
+
+        public async Task<(IEnumerable<PendingData> Items, int TotalCount)> GetPendingDataDetailsPaginatedAsync(string deliveryDate, string receivedDate, string lotNumber, string materialNo, string jobNumber, string toolId, int page, int pageSize)
+        {
             //parse date string to correct format yyyy-mm-dd
             DateTime dtDeliveryDate = DateTime.ParseExact(deliveryDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             DateTime dtReceivedDate = DateTime.ParseExact(receivedDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
@@ -160,23 +205,7 @@ namespace IDM.Repository.Main.Repository
 
         public async Task<int> UpdateDataParameterDetails(string status, string lotNumber, string deliveryDate, string receivedDate, string materialNo, string jobNumber, string toolId)
         //(string deliveryDate, string receivedDate, string lotNumber, string materialNo, string jobNumber, string toolId,
-        {
-            var dateFormats = new[]
-            {
-                "MM/dd/yyyy HH:mm:ss",
-                "yyyy-MM-dd"
-            };
-
-            //if (!DateTime.TryParseExact( deliveryDate, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDeliveryDate))
-            //{
-            //    throw new ArgumentException("Invalid delivery date.");
-            //}
-
-            //if (!DateTime.TryParseExact( receivedDate, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedReceivedDate))
-            //{
-            //    throw new ArgumentException("Invalid received date.");
-            //} 
-
+        { 
             //parse date string to correct format yyyy-mm-dd
             DateTime dtDeliveryDate = DateTime.ParseExact(deliveryDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             DateTime dtReceivedDate = DateTime.ParseExact(receivedDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
@@ -208,6 +237,39 @@ namespace IDM.Repository.Main.Repository
                 });
             }
         }
+
+        public async Task<IEnumerable<ParameterTrial>> GetTrialAsync(IncomingData incomingData)
+        {
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                var sql = @"SELECT * FROM DATA_PARAMETER_TRIALS  
+                            WHERE 
+                                DELIVERYDATE = @delivery_Date 
+                                AND ACTIVEFLAG = 'Y' 
+                                AND RECEIVEDDATE = @received_Date 
+                                AND MATERIAL_NO = @material_No 
+                                AND 
+                                (
+                                    LOTNUMBER = @lotNumber 
+                                    OR (@lotNumber IS NULL AND LOTNUMBER IS NULL) 
+                                    OR (@lotNumber = '' AND LOTNUMBER = '')
+                                )
+                                AND 
+                                (
+                                    JOB_NUMBER = @job_Number 
+                                    OR (@job_Number IS NULL AND JOB_NUMBER IS NULL)
+                                    OR (@job_Number = '' AND JOB_NUMBER = '')
+                                )
+                                AND 
+                                (
+                                    TOOLID = @toolId 
+                                    OR (@toolId IS NULL AND TOOLID IS NULL)
+                                    OR (@toolId = '' AND TOOLID = '')
+                                ); ";
+                return await connection.QueryAsync<ParameterTrial>(sql, incomingData);
+            }
+        }
+
 
     }
 }

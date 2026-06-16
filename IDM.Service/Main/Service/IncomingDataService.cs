@@ -114,6 +114,19 @@ namespace IDM.Service.Main.Service
                         table.Columns.Add(columnName, typeof(string));
                 }
             }
+            else 
+            { 
+                var trialProperties = typeof(ParameterTrial)
+                    .GetProperties()
+                    .Where(p => p.PropertyType == typeof(string) || p.PropertyType.IsValueType);
+
+                foreach (var prop in trialProperties)
+                {
+                    var columnName = FormatColumnName(prop.Name, configDTO);
+                    if (!configDTO.MQExcludeColumn.Contains(columnName))
+                        table.Columns.Add(columnName, typeof(string));
+                }
+            }
         }
 
         private void AddParameterRows(DataTable table, IncomingDataDTO incomingDataDTO, ConfigDTO configDTO)

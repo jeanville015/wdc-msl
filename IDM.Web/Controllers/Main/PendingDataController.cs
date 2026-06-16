@@ -71,25 +71,17 @@ namespace IDM.Web.Controllers.Main
                 status = status?.Trim().ToUpperInvariant();
 
                 if (status != "PASSED" && status != "REJECTED")
-                    return Json(new { success = false, message = "Invalid decision status." });
+                    return Json(new { success = false, message = "Invalid decision status." }); 
 
-                //if (new[] { lotNumber, deliveryDate, receivedDate, materialNo, jobNumber, toolId }.Any(string.IsNullOrWhiteSpace))
-                //{
-                //    return Json(new
-                //    {
-                //        success = false,
-                //        message = "One or more record identifiers are missing."
-                //    });
-                //}
-
-                var rowsAffected = await _pendingDataService.UpdateDataParameterDetails(status, lotNumber, deliveryDate, receivedDate, materialNo, jobNumber, toolId);
-
+                var rowsAffected = await _pendingDataService.UpdateDataParameterDetails(status, lotNumber, deliveryDate, receivedDate, materialNo, jobNumber, toolId); 
                 if (rowsAffected <= 0)
                     return Json(new
                     {
                         success = false,
                         message = "No matching pending records were found."
                     });
+
+
 
                 return Json(new
                 {
