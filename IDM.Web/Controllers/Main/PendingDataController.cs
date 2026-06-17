@@ -1,5 +1,7 @@
-﻿using IDM.DTO.Main.View;
+﻿using IDM.DTO.Main;
+using IDM.DTO.Main.View;
 using IDM.Service.Main.Interface;
+using IDM.Service.Main.Service;
 using IDM.Web.DataAccess;
 using IDM.Web.Filters;
 using IDM.Web.Helper;
@@ -24,7 +26,7 @@ namespace IDM.Web.Controllers.Main
         [SessionAuthorize(AllowedGroups = new[] { "IT", "SQE" })]
         public ActionResult Index()
         {
-            SetPageHeader("PendingData");
+            SetPageHeader("Pending Data");
             return View("~/Views/Main/PendingData/PendingData.cshtml");
         }
 
@@ -46,7 +48,7 @@ namespace IDM.Web.Controllers.Main
         {
             try
             {
-                var data = await _pendingDataService.GetPendingDataDetailsAsync(deliveryDate, receivedDate, lotNumber, materialNo, jobNumber, toolId, page, pageSize);
+                var data = await _pendingDataService.GetPendingDataDetailsPaginatedAsync(deliveryDate, receivedDate, lotNumber, materialNo, jobNumber, toolId, page, pageSize);
 
                 return PartialView("~/Views/Main/PendingData/_list_details.cshtml", data);
             }
@@ -81,7 +83,19 @@ namespace IDM.Web.Controllers.Main
                         message = "No matching pending records were found."
                     });
 
-
+                // ------------------------------------------------------------------------//
+                var pendingData = await _pendingDataService.GetPendingDataDetailsAsync(deliveryDate, receivedDate, lotNumber, materialNo, jobNumber, toolId);
+                // Get MQ configuration 
+                var config = GetConfiguration(); 
+                // Upload parameters to MQ
+                var parameterResult = await _pendingDataService.MQUploadPreparationParameter(config, pendingData);
+                if (parameterResult == -1)
+                    return Json(new { success = false, message = "MQ upload failed for Parameter table." }); 
+                // Upload trials to MQ
+                var trialResult = await _pendingDataService.MQUploadPreparationTrial(config, pendingData);
+                if (trialResult == -1)
+                    return Json(new { success = false, message = "MQ upload failed for Trial table." });
+                // -------------------------------------------------------------------------//
 
                 return Json(new
                 {

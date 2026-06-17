@@ -41,18 +41,18 @@ namespace IDM.Web.Controllers.Main
                 return Json(new { success = false, message = "This Incoming Data already exists. Please try another Area." });
 
             // transfer this block to APPROVE logic------------------------------------------------------------------------//
-            // Get MQ configuration 
-            var config = GetConfiguration();
-            //PDBAXLib.PdbClass PDB = new PDBAXLib.PdbClass();
-            // Upload parameters to MQ
-            var parameterResult = await _incomingDataService.MQUploadPreparationParameter(incomingDataDTO, config);
-            if (parameterResult == -1)
-                return Json(new { success = false, message = "MQ upload failed for Parameter table." });
+            //// Get MQ configuration 
+            //var config = GetConfiguration();
+            ////PDBAXLib.PdbClass PDB = new PDBAXLib.PdbClass();
+            //// Upload parameters to MQ
+            //var parameterResult = await _incomingDataService.MQUploadPreparationParameter(incomingDataDTO, config);
+            //if (parameterResult == -1)
+            //    return Json(new { success = false, message = "MQ upload failed for Parameter table." });
 
-            // Upload trials to MQ
-            var trialResult = await _incomingDataService.MQUploadPreparationTrial(incomingDataDTO, config);
-            if (trialResult == -1)
-                return Json(new { success = false, message = "MQ upload failed for Trial table." });
+            //// Upload trials to MQ
+            //var trialResult = await _incomingDataService.MQUploadPreparationTrial(incomingDataDTO, config);
+            //if (trialResult == -1)
+            //    return Json(new { success = false, message = "MQ upload failed for Trial table." });
             //-------------------------------------------------------------------------------------------------------------//
 
             // Send email if any parameter failed or is out of control

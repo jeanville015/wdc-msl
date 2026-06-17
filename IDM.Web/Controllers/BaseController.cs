@@ -214,6 +214,11 @@ namespace IDM.Web.Controllers
                 breadcrumbs.Add(("Data", "/Data", action == "Index" ? "active" : ""));
                 SetActiveMenu("Data", "");
             }
+            if (controller == "PendingData")
+            {
+                breadcrumbs.Add(("Pending Data", "/PendingData", action == "Index" ? "active" : ""));
+                SetActiveMenu("PendingData", "");
+            }
             if (controller == "ToolEntryItems")
             {
                 breadcrumbs.Add(("Tool Entry Items", "/ToolEntryItems", action == "Index" ? "active" : ""));
