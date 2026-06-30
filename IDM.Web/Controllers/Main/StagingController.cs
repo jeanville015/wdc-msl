@@ -239,6 +239,7 @@ namespace IDM.Web.Controllers.Main
                     ? new TableData { Columns = new List<string>(), Data = new List<List<string>>() }
                     : JsonConvert.DeserializeObject<TableData>(tableContent);
 
+                // will removed the unnecessary 'Ad/' on the value
                 analyzedBy = SanitizeAdUserId(analyzedBy);
                 var result = await _dynamicStagingService.ProcessApprovalWithNotificationAsync(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableData, UserId, config); 
 
@@ -272,7 +273,6 @@ namespace IDM.Web.Controllers.Main
 
                 // will removed the unnecessary 'Ad/' on the value
                 analyzedBy = SanitizeAdUserId(analyzedBy);
-
                 result = await _dynamicStagingService.SetApprovalStagingWImage(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableContent, UserId, returnUrl);
 
                 if (!result.OperationStatus)

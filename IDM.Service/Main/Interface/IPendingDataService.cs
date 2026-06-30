@@ -3,6 +3,7 @@ using IDM.DTO.Main;
 using IDM.DTO.User;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using IDM.Model.Common;
 
 namespace IDM.Service.Main.Interface
 {
@@ -15,5 +16,6 @@ namespace IDM.Service.Main.Interface
         Task<int> UpdateDataParameterDetails(string status, string lotNumber, string deliveryDate, string receivedDate, string materialNo, string jobNumber, string toolId);
         Task<int> MQUploadPreparationParameter(ConfigDTO configDTO, IEnumerable<PendingDataDTO> pendingData);
         Task<int> MQUploadPreparationTrial(ConfigDTO configDTO, IEnumerable<PendingDataDTO> pendingData);
+        SubmitResult SendEDCSPC(IEnumerable<PendingDataDTO> pendingData, string operatorId);
     }
 }

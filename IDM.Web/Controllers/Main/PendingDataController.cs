@@ -11,12 +11,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using IDM.Model;
+using IDM.Model.Common;
+using System.Data;
 
 namespace IDM.Web.Controllers.Main
 {
     public class PendingDataController : BaseController
     {
-        private readonly EDCSPC _edcspc = new EDCSPC();
         public readonly IPendingDataService _pendingDataService;
         public PendingDataController(IPendingDataService pendingDataService)
         {
@@ -73,29 +75,43 @@ namespace IDM.Web.Controllers.Main
                 status = status?.Trim().ToUpperInvariant();
 
                 if (status != "PASSED" && status != "REJECTED")
-                    return Json(new { success = false, message = "Invalid decision status." }); 
+                    return Json(new { success = false, message = "Invalid decision status." });
 
-                var rowsAffected = await _pendingDataService.UpdateDataParameterDetails(status, lotNumber, deliveryDate, receivedDate, materialNo, jobNumber, toolId); 
+                // MQ upload; EDCSPC upload
+                if (status == "PASSED")
+                {
+                    var pendingData = await _pendingDataService.GetPendingDataDetailsAsync(deliveryDate, receivedDate, lotNumber, materialNo, jobNumber, toolId);
+                    // Get MQ configuration 
+                    var config = GetConfiguration();
+
+                    // Upload parameters to MQ------------------------------------------------------------------------//
+                    var parameterResult = await _pendingDataService.MQUploadPreparationParameter(config, pendingData);
+                    if (parameterResult == -1)
+                        return Json(new { success = false, message = "MQ upload failed for Parameter table." });
+                    //------------------------------------------------------------------------------------------------//
+
+                    // Upload trials to MQ--------------------------------------------------------------------//
+                    var trialResult = await _pendingDataService.MQUploadPreparationTrial(config, pendingData);
+                    if (trialResult == -1)
+                        return Json(new { success = false, message = "MQ upload failed for Trial table." });
+                    //---------------------------------------------------------------------------------------//
+
+                    // EDCSPC -------------------------------------------------------------------------------------------//
+                    var edcspcResult = _pendingDataService.SendEDCSPC(pendingData, Convert.ToString(Session["Username"]));
+                    if (!edcspcResult.Success)
+                        return Json(new { success = false, message = "EDCSPC upload failed: " + edcspcResult.Error });
+                    // -------------------------------------------------------------------------------------------------//
+                }
+
+                // Only update status after successful MQ / EDCSPC processing-----------------------------------------------------------------------------------------//
+                var rowsAffected = await _pendingDataService.UpdateDataParameterDetails(status, lotNumber, deliveryDate, receivedDate, materialNo, jobNumber, toolId);
                 if (rowsAffected <= 0)
                     return Json(new
                     {
                         success = false,
                         message = "No matching pending records were found."
                     });
-
-                // ------------------------------------------------------------------------//
-                var pendingData = await _pendingDataService.GetPendingDataDetailsAsync(deliveryDate, receivedDate, lotNumber, materialNo, jobNumber, toolId);
-                // Get MQ configuration 
-                var config = GetConfiguration(); 
-                // Upload parameters to MQ
-                var parameterResult = await _pendingDataService.MQUploadPreparationParameter(config, pendingData);
-                if (parameterResult == -1)
-                    return Json(new { success = false, message = "MQ upload failed for Parameter table." }); 
-                // Upload trials to MQ
-                var trialResult = await _pendingDataService.MQUploadPreparationTrial(config, pendingData);
-                if (trialResult == -1)
-                    return Json(new { success = false, message = "MQ upload failed for Trial table." });
-                // -------------------------------------------------------------------------//
+                //----------------------------------------------------------------------------------------------------------------------------------------------------//
 
                 return Json(new
                 {

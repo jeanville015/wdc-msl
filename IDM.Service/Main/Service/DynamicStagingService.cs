@@ -98,10 +98,14 @@ namespace IDM.Service.Main.Service
             setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
             if (setItemStatus == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Updating of the item status was unsuccessful" }; }
 
+            DataTable emailDataTable = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+            string materialNo = GetColumnValue(emailDataTable.Rows.Cast<DataRow>().FirstOrDefault(), "Material_No", "MaterialNumber", "MATERIAL_NO", "MATERIALNUMBER");
+            var approvalEmailData = await _dynamicStagingRepository.GetApprovalEmailDataAsync(materialNo);
+
             if (status == "REJECTED")
             {
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
-                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
+                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, approvalEmailData);
                 if (resultEmailSendRejectionEmail)
                 {
                     result.OperationStatus = true;
@@ -132,7 +136,7 @@ namespace IDM.Service.Main.Service
 
                 var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
-                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl);
+                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl, approvalEmailData);
                 if (resultEmailSendApproveEmail)
                 {
                     result.OperationStatus = true;
@@ -386,11 +390,19 @@ namespace IDM.Service.Main.Service
                     }
                     PDB.formatEnd("Detail");
                     PDB.transmit(null);
+                    // Breakpoint here: transmit returned without a reported error
+                    System.Diagnostics.Debug.WriteLine($"MQ transmit completed for transaction {transaction}");
                 }
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                System.Diagnostics.Debug.WriteLine( 
+                    $"MQ COM error 0x{ex.ErrorCode:X8}: {ex}");
+                return false;
             }
             catch (Exception ex)
             {
-                string strerr = ex.Message;
+                System.Diagnostics.Debug.WriteLine($"MQ error: {ex}");
                 return false;
             }
             return true;
@@ -777,6 +789,20 @@ namespace IDM.Service.Main.Service
             }
 
             return operationResult;
+        }
+
+        private static string GetColumnValue(DataRow row, params string[] possibleNames)
+        {
+            if (row == null)
+                return string.Empty;
+
+            foreach (var name in possibleNames)
+            {
+                if (row.Table.Columns.Contains(name))
+                    return row[name]?.ToString() ?? string.Empty;
+            }
+
+            return string.Empty;
         }
 
         private string FormatDataName(string tableName)

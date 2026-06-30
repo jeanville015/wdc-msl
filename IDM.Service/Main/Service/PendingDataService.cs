@@ -3,6 +3,8 @@ using IDM.DTO;
 using IDM.DTO.Main;
 using IDM.DTO.Maintenance;
 using IDM.DTO.User;
+using IDM.Model;
+using IDM.Model.Common;
 using IDM.Model.Main;
 using IDM.Model.Maintenance;
 using IDM.Repository.Main.Interface;
@@ -18,11 +20,13 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using IDM.Service.DataAccess;
 
 namespace IDM.Service.Main.Service
 {
     public class PendingDataService : IPendingDataService
     {
+        private readonly EDCSPC _edcspc = new EDCSPC();
         private readonly IPendingDataRepository _pendingDataRepository;
         private readonly IMapper _Mapper;
 
@@ -316,5 +320,64 @@ namespace IDM.Service.Main.Service
             }
             return 1;
         }
+
+        public SubmitResult SendEDCSPC(IEnumerable<PendingDataDTO> pendingData, string operatorId)
+        {
+            var rows = pendingData?.ToList() ?? new List<PendingDataDTO>();
+
+            if (!rows.Any())
+                return SubmitResult.Fail("No pending data found for EDCSPC submission.");
+
+            var first = rows.First();
+
+            var table = new DataTable();
+
+            table.Columns.Add("PROCTOOLINFO");
+            table.Columns.Add("LOT NUMBER");
+            table.Columns.Add("JOB#");
+            table.Columns.Add("MATERIAL#");
+
+            foreach (var item in rows)
+            {
+                var columnName = BuildEDCSPCParameterColumnName(item);
+
+                if (!table.Columns.Contains(columnName))
+                    table.Columns.Add(columnName);
+            }
+
+            var row = table.NewRow();
+
+            row["PROCTOOLINFO"] = first.Material_Name;
+            row["LOT NUMBER"] = string.IsNullOrWhiteSpace(first.LotNumber) ? "-" : first.LotNumber;
+            row["JOB#"] = string.IsNullOrWhiteSpace(first.Job_Number) ? "-" : first.Job_Number;
+            row["MATERIAL#"] = first.Material_No;
+
+            foreach (var item in rows)
+            {
+                row[BuildEDCSPCParameterColumnName(item)] = item.Parameter_Value;
+            }
+
+            table.Rows.Add(row);
+
+            var edcspcConfig = new EDCSPCDataSending
+            {
+                Operator = operatorId,
+                Operation = "7000",
+                WaferLot = "PQ-7000-*",
+                Product = first.Material_Name,
+                TimePrepared = DateTime.Now
+            };
+
+            edcspcConfig.ChartName.Add(first.Material_Name);
+            edcspcConfig.SourceEntity.Add(first.Material_No);
+
+            return _edcspc.Submit(table, edcspcConfig);
+        }
+
+        private static string BuildEDCSPCParameterColumnName(PendingDataDTO item)
+        {
+            return $"{item.Site_Name?.ToUpperInvariant()}_{item.Parameter_Name}";
+        }
+
     }
 }

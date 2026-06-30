@@ -1,8 +1,9 @@
-using IDM.Model.Main;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Data;
 using IDM.Model.Common;
+using IDM.Model.Main;
+using IDM.Model.Main.Email;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace IDM.Repository.Main.Interface
 {
@@ -18,6 +19,7 @@ namespace IDM.Repository.Main.Interface
         Task<string> GetCustomerAsync(string amethystJob, string analysis, int analysisTrial);
         Task<string> GetStatusAsync(string amethystJob, string analysis, int analysisTrial);
         Task<IEnumerable<string>> GetUserListByAnalysisAsync(string analysisName);
+        Task<ApprovalEmailHeaderData> GetApprovalEmailDataAsync(string materialNo);
 
     }
 }

@@ -2,6 +2,7 @@ using Dapper;
 using IDM.Data;
 using IDM.Model.Common;
 using IDM.Model.Main;
+using IDM.Model.Main.Email;
 using IDM.Model.Maintenance;
 using IDM.Model.User;
 using IDM.Repository.Main.Interface;
@@ -374,6 +375,47 @@ namespace IDM.Repository.Main.Repository
 
                 return $"[{trimmed}]";
             }));
+        }
+
+        public async Task<ApprovalEmailHeaderData> GetApprovalEmailDataAsync(string materialNo)
+        {
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                var headerSql = @"
+            SELECT TOP (1)
+                DPD.MATERIAL_NO AS MaterialNumber,
+                DPD.MATERIAL_NAME AS MaterialName,
+                DPD.LOTNUMBER AS LotNumberName,
+                CONVERT(varchar(10), DPD.DELIVERY_DATE, 120) AS DeliveryDate,
+                CONVERT(varchar(10), DPD.RECEIVED_DATE, 120) AS ReceivedDate
+            FROM [IDM ].[dbo].[DATA_PARAMETER_DETAILS] DPD
+            WHERE DPD.MATERIAL_NO = @MaterialNo;";
+
+                var detailsSql = @"
+            SELECT
+                DPD.PARAMETER_NAME AS ParameterName,
+                DPD.PARAMETER_VALUE AS ParameterValue,
+                DPD.UOM_NAME AS UomName,
+                DPD.UPPER_SPECS_LIMIT AS UpperSpecsLimit,
+                DPD.UPPER_CONTROL_LIMIT AS UpperControlLimit,
+                DPD.SITE_NAME AS SiteName,
+                DPD.JUDGEMENT AS Judgement,
+                DPD.CONTROL_JUDGEMENT AS ControlJudgement
+            FROM [IDM ].[dbo].[DATA_PARAMETER_DETAILS] DPD
+            WHERE DPD.MATERIAL_NO = @MaterialNo;";
+
+                var header = await connection.QueryFirstOrDefaultAsync<ApprovalEmailHeaderData>(
+                    headerSql,
+                    new { MaterialNo = materialNo }
+                ) ?? new ApprovalEmailHeaderData();
+
+                header.ParameterDetails = (await connection.QueryAsync<ParameterDetails>(
+                    detailsSql,
+                    new { MaterialNo = materialNo }
+                )).ToList();
+
+                return header;
+            }
         }
 
     }

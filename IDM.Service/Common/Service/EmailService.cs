@@ -1,5 +1,6 @@
 using IDM.DTO;
 using IDM.DTO.Main;
+using IDM.Model.Main.Email;
 using IDM.Service.Common.Interface;
 using System;
 using System.Collections.Generic;
@@ -105,7 +106,7 @@ namespace IDM.Service.Common.Service
             }
         }
 
-        public async Task<bool> SendRejectionEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver)
+        public async Task<bool> SendRejectionEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, ApprovalEmailHeaderData approvalEmailData = null)
         {
             try
             {
@@ -115,6 +116,7 @@ namespace IDM.Service.Common.Service
 
                 string emailContent = BuildEmailHeader(recipientName, "MSL Data") +
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='warning'>{status}</span> by Ma'am/Sir {approverName}</p>" +
+                                        BuildApprovalEmailDataSection(approvalEmailData) +
                                         BuildEmailFooter(null);
 
                 var mailModel = await CreateMailViewModel(userList, recipientEmail, "MSL Web System : FAILED", emailContent);
@@ -129,7 +131,7 @@ namespace IDM.Service.Common.Service
             }
         }
 
-        public async Task<bool> SendApprovalEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, string customer, string returnUrl)
+        public async Task<bool> SendApprovalEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, string customer, string returnUrl, ApprovalEmailHeaderData approvalEmailData = null)
         {
             try
             {
@@ -142,6 +144,7 @@ namespace IDM.Service.Common.Service
 
                 string emailContent = BuildEmailHeader(recipientName, "MSL Data") +
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='success'>{status}</span> by Ma'am/Sir {approverName}</p>" +
+                                        BuildApprovalEmailDataSection(approvalEmailData) +
                                         BuildEmailFooter(returnUrl);
 
                 var mailModel = await CreateMailViewModel(userList, allRecipients, "MSL Web System : APPROVED", emailContent);
@@ -217,5 +220,34 @@ namespace IDM.Service.Common.Service
                 Body = body
             };
         }
+
+        private string BuildApprovalEmailDataSection(ApprovalEmailHeaderData data)
+        {
+            if (data == null)
+                return string.Empty;
+
+            var html =
+                "<table class='material-info'>" +
+                "<tr><th>Field</th><th>Value</th></tr>" +
+                $"<tr><td>Material Number</td><td>{data.MaterialNumber}</td></tr>" +
+                $"<tr><td>Material Name</td><td>{data.MaterialName}</td></tr>" +
+                $"<tr><td>Lot Number Name</td><td>{data.LotNumberName}</td></tr>" +
+                $"<tr><td>Delivery Date</td><td>{data.DeliveryDate}</td></tr>" +
+                $"<tr><td>Received Date</td><td>{data.ReceivedDate}</td></tr>" +
+                "</table>";
+
+            html += "<p><span class='bold'>Parameter Details:</span></p>" +
+                    "<table class='parameters'>" +
+                    "<tr><th>Parameter Name</th><th>Parameter Value</th><th>UOM</th><th>Upper Specs Limit</th><th>Upper Control Limit</th><th>Site</th><th>Judgement</th><th>Control Judgement</th></tr>";
+
+            foreach (var p in data.ParameterDetails)
+            {
+                html += $"<tr><td>{p.ParameterName}</td><td>{p.ParameterValue}</td><td>{p.UomName}</td><td>{p.UpperSpecsLimit}</td><td>{p.UpperControlLimit}</td><td>{p.SiteName}</td><td>{p.Judgement}</td><td>{p.ControlJudgement}</td></tr>";
+            }
+
+            html += "</table>";
+            return html;
+        }
+
     }
 }
