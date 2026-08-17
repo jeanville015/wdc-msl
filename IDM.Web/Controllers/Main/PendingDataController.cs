@@ -97,7 +97,16 @@ namespace IDM.Web.Controllers.Main
                     //---------------------------------------------------------------------------------------//
 
                     // EDCSPC -------------------------------------------------------------------------------------------//
-                    var edcspcResult = _pendingDataService.SendEDCSPC(pendingData, Convert.ToString(Session["Username"]));
+                    var operatorId = Convert.ToString(Session["UserId"]); 
+                    if (string.IsNullOrWhiteSpace(operatorId))
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = "EDCSPC upload failed: User/operator ID is missing from the session."
+                        });
+                    }
+                    var edcspcResult = _pendingDataService.SendEDCSPC(pendingData, operatorId.Trim());
                     if (!edcspcResult.Success)
                         return Json(new { success = false, message = "EDCSPC upload failed: " + edcspcResult.Error });
                     // -------------------------------------------------------------------------------------------------//

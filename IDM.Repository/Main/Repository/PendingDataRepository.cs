@@ -62,16 +62,16 @@ namespace IDM.Repository.Main.Repository
                     parameters.Add("ReceivedDate", strReceivedDate, DbType.String);
 
                     // Append string filters
-                    sql.Append(" AND [LOT_NUMBER] = @LotNumber");
+                    sql.Append(" AND [LOTNUMBER] = @LotNumber");
                     parameters.Add("LotNumber", lotNumber, DbType.String);
 
                     sql.Append(" AND [MATERIAL_NO] = @MaterialNo");
                     parameters.Add("MaterialNo", materialNo, DbType.String);
 
-                    sql.Append(" AND [JOB_NUMBER] = @JobNumber");
+                    sql.Append(" AND ([JOB_NUMBER] = @jobNumber OR @jobNumber IS NULL OR @jobNumber = '')");
                     parameters.Add("JobNumber", jobNumber, DbType.String);
 
-                    sql.Append(" AND [TOOL_ID] = @ToolId");
+                    sql.Append(" AND ([TOOLID] = @toolId OR @toolId IS NULL OR @toolId = '')");
                     parameters.Add("ToolId", toolId, DbType.String);
 
                     return await connection.QueryAsync<PendingData>(sql.ToString(), parameters);

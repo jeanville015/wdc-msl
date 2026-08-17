@@ -6,6 +6,8 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using IDM.Service.DataAccessModel;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace IDM.Service.DataAccess
 {
@@ -55,8 +57,8 @@ namespace IDM.Service.DataAccess
             }
             catch (Exception ex)
             {
-                _log.Log(ex.Message);
-                return SubmitResult.Fail(ex.Message);
+                _log.Log(ex.ToString());
+                return SubmitResult.Fail(ex.InnerException?.Message ?? ex.Message);
             }
         }
 
@@ -104,6 +106,10 @@ namespace IDM.Service.DataAccess
 
         private SubmitResult SubmitToEdcspc(DataModel dataModel)
         {
+            var configError = ValidateEdcspcConfig();
+            if (!string.IsNullOrEmpty(configError))
+                return SubmitResult.Fail(configError);
+
             var sub = new WDHelpers.EDCSPCHelper.EDCSubmission(
                 dataModel.WaferID, dataModel.ToolEntity, dataModel.TestDate);
 
@@ -142,6 +148,34 @@ namespace IDM.Service.DataAccess
             }
 
             return SubmitResult.Ok();
+        }
+
+        private static string ValidateEdcspcConfig()
+        {
+            var requiredSections = new Dictionary<string, string[]>
+            {
+                { "MessageBusHelper", new[] { "BrokerName", "SelfDisconnectIdleMinutes", "SonicMessageProducerWaitTimeInMilliSecs" } },
+                { "EDCHelper", new[] { "DatabaseType", "DatabaseName", "EDCDbType", "EDCDbName", "DBTimeout", "CSVBackupDir", "CSVFilesBackupDays", "OpsWithDuplicateToolVariableNames", "MaxWaferLength", "ReplyTimeoutSeconds", "TopicDomain", "TopicType" } },
+                { "SPCHelper", new[] { "DatabaseName", "DatabaseType" } },
+                { "ActionHelper", new[] { "DatabaseName", "DatabaseType", "TopicType", "TopicDomain" } }
+            };
+
+            foreach (var requiredSection in requiredSections)
+            {
+                var section = ConfigurationManager.GetSection(requiredSection.Key) as NameValueCollection;
+
+                if (section == null)
+                    return $"Missing config section: {requiredSection.Key}";
+
+                var missingKeys = requiredSection.Value
+                    .Where(key => string.IsNullOrWhiteSpace(section[key]))
+                    .ToList();
+
+                if (missingKeys.Any())
+                    return $"Missing config keys in {requiredSection.Key}: {string.Join(", ", missingKeys)}";
+            }
+
+            return string.Empty;
         }
     }
 }

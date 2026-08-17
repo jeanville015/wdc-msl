@@ -8,19 +8,57 @@ var IncomingDataModule = (function () {
     function loadAccount() {
         return $.get(AppUrls.getAccount)
             .done(data => {
-                const $ddlReceivedBy = $('#ddlReceivedBy').empty().append(`<option value="0">-- Select User --</option>`);
-                $.each(data, (i, item) => {
-                    $ddlReceivedBy.append(`<option value="${item.id}">${item.user_Id}</option>`);
-                });
+                const peopleDropdowns = [
+                    {
+                        selector: '#ddlReceivedBy',
+                        placeholder: '-- Select Received By --'
+                    },
+                    {
+                        selector: '#ddlInspectedBy',
+                        placeholder: '-- Select Inspected By --'
+                    },
+                    {
+                        selector: '#ddlEncodedBy',
+                        placeholder: '-- Select Encoded By --'
+                    }
+                ];
 
-                const $ddlInspectedBy = $('#ddlInspectedBy').empty().append(`<option value="0">-- Select User --</option>`);
-                $.each(data, (i, item) => {
-                    $ddlInspectedBy.append(`<option value="${item.id}">${item.user_Id}</option>`);
-                });
+                $.each(peopleDropdowns, (i, config) => {
+                    const $ddl = $(config.selector);
 
-                const $ddlEncodedBy = $('#ddlEncodedBy').empty().append(`<option value="0">-- Select User --</option>`);
-                $.each(data, (i, item) => {
-                    $ddlEncodedBy.append(`<option value="${item.id}">${item.user_Id}</option>`);
+                    // Prevent duplicate Select2 initialization.
+                    if ($ddl.hasClass('select2-hidden-accessible')) {
+                        $ddl.select2('destroy');
+                    }
+
+                    $ddl.empty().append(
+                        new Option(config.placeholder, '0')
+                    );
+
+                    $.each(data, (j, item) => {
+                        const userId = item.user_Id || '';
+                        const fullName = item.adName || '';
+
+                        if (!userId) {
+                            return;
+                        }
+
+                        const displayText = fullName
+                            ? `${userId} | ${fullName}`
+                            : userId;
+
+                        // Display: userId | full name
+                        // Submitted value: userId only
+                        $ddl.append(new Option(displayText, userId));
+                    });
+
+                    $ddl.select2({
+                        placeholder: config.placeholder,
+                        allowClear: true,
+                        width: '100%',
+                        minimumInputLength: 0,
+                        minimumResultsForSearch: 0
+                    });
                 });
             });
     }
@@ -64,20 +102,51 @@ var IncomingDataModule = (function () {
                     parameterName: item.parameter_Name,
                     site: item.site_Name
                 }));
-                
-                const ddl = $('#ddlParameter').empty().append(`<option value="0">-- Select Parameter --</option>`);
+
+                const $ddlParameter = $('#ddlParameter');
+
+                if ($ddlParameter.hasClass('select2-hidden-accessible')) {
+                    $ddlParameter.select2('destroy');
+                }
+
+                $ddlParameter.empty().append(new Option('-- Select Parameter --', '0'));
+
                 $.each(data, (i, item) => {
                     // Check if this parameter+site combination already exists
                     const isExisting = existingCombinations.some(existing => 
                         existing.parameterName === item.parameter_Name && existing.site === item.site_Name
                     );
-                    
+
                     // Only add option if it doesn't exist or if site is empty
                     if (!isExisting || !item.site_Name) {
-                        ddl.append(`<option value="${item.id}">${item.parameter_Name}</option>`);
+                        const displayText = item.site_Name
+                            ? `${item.parameter_Name} | ${item.site_Name}`
+                            : item.parameter_Name;
+
+                        // Keep the record ID as the internal option value for parameter lookup.
+                        // The submitted parameter name is read from parameterList, not this label.
+                        $ddlParameter.append(new Option(displayText, item.id));
                     }
                 });
+
+                $ddlParameter.select2({
+                    placeholder: '-- Select Parameter --',
+                    allowClear: true,
+                    width: '100%',
+                    minimumInputLength: 0,
+                    minimumResultsForSearch: 0
+                });
             });
+    }
+
+    function getSelectedParameter() {
+        const selectedId = parseInt($('#ddlParameter').val(), 10);
+        return parameterList.find(parameter => parameter.id === selectedId) || null;
+    }
+
+    function getSelectedParameterName() {
+        const selectedParameter = getSelectedParameter();
+        return selectedParameter ? selectedParameter.parameter_Name : '';
     }
 
     function bindEvents() {
@@ -118,7 +187,7 @@ var IncomingDataModule = (function () {
             // Validate required fields before showing trial modal
             const deliveryDate = $('#txtDeliveryDate').val().trim();
             const receivedDate = $('#txtReceivedDate').val().trim();
-            const parameterName = $('#ddlParameter option:selected').text().trim();
+            const parameterName = getSelectedParameterName().trim();
             
             // Check if delivery date is null or empty
             if (!deliveryDate || deliveryDate === '') {
@@ -135,7 +204,7 @@ var IncomingDataModule = (function () {
             }
             
             // Check if parameter name is null or not selected
-            if (!parameterName || parameterName === '-- Select Parameter --' || parameterName === '0') {
+            if (!parameterName) {
                 ToastrHelper.notification("error", "Please select a Parameter before adding trial data.", "Validation");
                 $('#ddlParameter').focus();
                 return;
@@ -226,7 +295,11 @@ var IncomingDataModule = (function () {
             console.log(selectedMaterial);
             
             // Clear all parameter-related fields first
-            $('#ddlParameter').empty().append(`<option value="0">-- Select Parameter --</option>`);
+            $('#ddlParameter')
+                .empty()
+                .append(new Option('-- Select Parameter --', '0'))
+                .val('0')
+                .trigger('change');
             $('#txtParameterValue').val('');
             $('#txtUom').val('');
             $('#txtSite').val('');
@@ -262,8 +335,7 @@ var IncomingDataModule = (function () {
         });
 
         $('#ddlParameter').on('change', function () {
-            const selectedId = parseInt($(this).val());
-            const selectedParameter = parameterList.find(p => p.id === selectedId);
+            const selectedParameter = getSelectedParameter();
             console.log(selectedParameter);
             
             // Clear parameter value and judgements first
@@ -408,10 +480,10 @@ var IncomingDataModule = (function () {
                 area_Name: $('#txtAreaName').val(),
                 supplier_Name: $('#txtSupplierName').val(),
                 manufacturer_Name: $('#txtManufacturerName').val(),
-                receivedBy: $('#ddlReceivedBy option:selected').text(),
+                receivedBy: $('#ddlReceivedBy').val(),
                 inspection_Date: $('#txtInspectionDate').val(),
-                inspectedBy: $('#ddlInspectedBy option:selected').text(),
-                encodedBy: $('#ddlEncodedBy option:selected').text(),
+                inspectedBy: $('#ddlInspectedBy').val(),
+                encodedBy: $('#ddlEncodedBy').val(),
                 remarks: $('#txtRemarks').val(),
                 packaging_Document_Check: $('#ddlPackaging option:selected').text(),
                 view_Appearance_Check: $('#ddlVisual option:selected').text(),
@@ -519,10 +591,8 @@ var IncomingDataModule = (function () {
             $('#txtAreaName').val('');
             $('#txtSupplierName').val('');
             $('#txtManufacturerName').val('');
-            $('#ddlReceivedBy').val('0');
+            $('#ddlReceivedBy, #ddlInspectedBy, #ddlEncodedBy').val('0').trigger('change');
             $('#txtInspectionDate').val('');
-            $('#ddlInspectedBy').val('0');
-            $('#ddlEncodedBy').val('0');
             $('#txtRemarks').val('');
             $('#ddlPackaging').val('0');
             $('#ddlVisual').val('0');
@@ -546,7 +616,7 @@ var IncomingDataModule = (function () {
 
         function saveParameterToPreSubmit() {
             // Get current parameter data
-            const parameterName = $('#ddlParameter option:selected').text();
+            const parameterName = getSelectedParameterName();
             const parameterValue = $('#txtParameterValue').val();
             const uom = $('#txtUom').val();
             const site = $('#txtSite').val();
@@ -557,7 +627,7 @@ var IncomingDataModule = (function () {
             const edcSpcFlag = $('#ddlParameter').data('edcSpcFlag') || '';
 
             // Validation
-            if (!parameterName || parameterName === '-- Select Parameter --') {
+            if (!parameterName) {
                 ToastrHelper.notification("error", "Please select a parameter.", "Validation");
                 return;
             }
@@ -682,7 +752,7 @@ var IncomingDataModule = (function () {
         }
 
         function clearParameterFields() {
-            $('#ddlParameter').val('0');
+            $('#ddlParameter').val('0').trigger('change');
             $('#txtParameterValue').val('');
             $('#txtUom').val('');
             $('#txtSite').val('');
@@ -810,7 +880,7 @@ var IncomingDataModule = (function () {
         trialData.push({
             trial_Counter: trialData.length + 1, // Auto-increment counter starting from 1
             trial_Value: trialValue,
-            parameter_Name: $('#ddlParameter option:selected').text(),
+            parameter_Name: getSelectedParameterName(),
             site_Name: $('#txtSite').val()
         });
         
@@ -918,7 +988,7 @@ var IncomingDataModule = (function () {
             toolId: $('#txtToolId').val(),
             job_Number: $('#txtJobNumber').val(),
             
-            parameter_Name: $('#ddlParameter option:selected').text(),
+            parameter_Name: getSelectedParameterName(),
             trial_Value: average,
             site_Name: $('#txtSite').val(),
             
@@ -926,7 +996,7 @@ var IncomingDataModule = (function () {
             trial: trialData.map(trial => ({
                 trial_Counter: trial.trial_Counter,
                 trial_Value: trial.trial_Value,
-                parameter_Name: $('#ddlParameter option:selected').text(),
+                parameter_Name: trial.parameter_Name,
                 site_Name: trial.site_Name
             }))
         };

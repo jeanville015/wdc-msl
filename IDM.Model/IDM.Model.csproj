@@ -60,6 +60,7 @@
     <Compile Include="Maintenance\Tool.cs" />
     <Compile Include="Maintenance\ToolType.cs" />
     <Compile Include="Maintenance\Uom.cs" />
+    <Compile Include="Main\Email\ApproveEmailHeaderData.cs" />
     <Compile Include="Main\PendingData.cs" />
     <Compile Include="Main\Data.cs" />
     <Compile Include="Main\DynamicStaging.cs" />

@@ -40,6 +40,38 @@
     <Reference Include="EDCSPCHelper">
       <HintPath>lib\EDCSPCHelper.dll</HintPath>
     </Reference>
+    <Reference Include="IdentifierHelper">
+      <HintPath>lib\IdentifierHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ConfigHelper">
+      <HintPath>lib\ConfigHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MessageBusHelper">
+      <HintPath>lib\MessageBusHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DatabaseHelper">
+      <HintPath>lib\DatabaseHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ActionHelper">
+      <HintPath>lib\ActionHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SPCHelper">
+      <HintPath>lib\SPCHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FabWDPHOSF">
+      <HintPath>lib\FabWDPHOSF.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>lib\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.10.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>

@@ -115,48 +115,52 @@ namespace IDM.Service.Main.Service
         }
         private async Task<int> CreateAndUploadMQTable(IEnumerable<PendingDataDTO> pendingDataDTOs, ConfigDTO configDTO, string transaction, bool includeMainData, bool useParameters)
         {
-            //var pendingData = _Mapper.Map<PendingData>(pendingDataDTO);
             var dataTable = new DataTable();
 
-            // Add columns based on configuration
-            AddColumnsToTable(dataTable, configDTO, includeMainData, useParameters);
+            // Add columns based on configuration.
+            AddColumnsToTable(
+                dataTable,
+                configDTO,
+                includeMainData,
+                useParameters);
 
-            foreach( var item in pendingDataDTOs)
+            var pendingRows = pendingDataDTOs?.ToList()
+                ?? new List<PendingDataDTO>();
+
+            if (useParameters)
             {
-                // Add rows based on data source
-                if (useParameters)
+                // AddParameterRows already loops through all pending rows,
+                // so call it only once.
+                AddParameterRows(dataTable, pendingRows,configDTO);
+            }
+            else
+            {
+                // Trial retrieval must still be performed for each pending row.
+                foreach (var item in pendingRows)
                 {
-                    AddParameterRows(dataTable, pendingDataDTOs, configDTO); 
-                }
-                else if (!useParameters)
-                {
+                    var incomingData = new IncomingData
+                    {
+                        LotNumber = item.LotNumber,
+                        Delivery_Date = item.Delivery_Date,
+                        Received_Date = item.Received_Date,
+                        Material_No = item.Material_No,
+                        Job_Number = item.Job_Number,
+                        ToolId = item.ToolId
+                    };
 
-                    //sanitize the IncomingData model to be used as parameter to avoid changing exisitong codes
-                    IncomingData incomingData = new IncomingData();
-                    incomingData.LotNumber = item.LotNumber;
-                    incomingData.Delivery_Date = item.Delivery_Date;
-                    incomingData.Received_Date = item.Received_Date;
-                    incomingData.Material_No = item.Material_No;
-                    incomingData.Job_Number = item.Job_Number;
-                    incomingData.ToolId = item.ToolId;
-                    var trialData = await _pendingDataRepository.GetTrialAsync(incomingData);
+                    var trialData =
+                        await _pendingDataRepository.GetTrialAsync(incomingData);
 
-                    // End process if no trial data returned
                     if (trialData?.Any() != true)
                     {
-                        return 0; // Return error code to indicate no trial data
+                        return 0;
                     }
 
-                    AddTrialRows(dataTable, trialData, configDTO);
+                    AddTrialRows( dataTable, trialData, configDTO);
                 }
-                else
-                {
-                    // Create empty row if no data
-                    dataTable.Rows.Add(dataTable.NewRow());
-                }
-            } 
+            }
 
-            return await MQUpload(dataTable, configDTO, transaction);
+            return await MQUpload( dataTable, configDTO, transaction);
         }
 
         private void AddColumnsToTable(DataTable table, ConfigDTO configDTO, bool includeMainData, bool useParameters)
@@ -206,31 +210,76 @@ namespace IDM.Service.Main.Service
                 }
             }
         }
-
-        private void AddParameterRows(DataTable table, IEnumerable<object> listOfPendingDataDTO, ConfigDTO configDTO)
+        private static bool IsConfiguredColumn(string configuredColumns, string columnName)
         {
-            if (listOfPendingDataDTO?.Any() != true)
-            { 
+            if (string.IsNullOrWhiteSpace(configuredColumns) ||
+                string.IsNullOrWhiteSpace(columnName))
+            {
+                return false;
+            }
+
+            return configuredColumns
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(value => value.Trim())
+                .Any(value => string.Equals(
+                    value,
+                    columnName,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void AddParameterRows(DataTable table, IEnumerable<PendingDataDTO> pendingDataDTOs, ConfigDTO configDTO)
+        {
+            var pendingRows = pendingDataDTOs?.ToList()
+                ?? new List<PendingDataDTO>();
+
+            if (!pendingRows.Any())
+            {
                 table.Rows.Add(table.NewRow());
                 return;
             }
-            var properties = listOfPendingDataDTO.First().GetType()
-                .GetProperties()
-                .Where(p => p.PropertyType == typeof(string) || p.PropertyType.IsValueType);
 
-            foreach (var trial in listOfPendingDataDTO)
+            var properties = typeof(PendingDataDTO)
+                .GetProperties()
+                .Where(p => p.PropertyType == typeof(string) ||
+                            p.PropertyType.IsValueType);
+
+            foreach (var pendingData in pendingRows)
             {
                 var row = table.NewRow();
 
-                foreach (var prop in properties)
+                foreach (var property in properties)
                 {
-                    var columnName = FormatColumnName(prop.Name, configDTO);
-                    if (!configDTO.MQExcludeColumn.Contains(columnName))
+                    var columnName = GetPendingMqColumnName(
+                        property.Name,
+                        configDTO);
+
+                    // A null mapping means this property is intentionally
+                    // not included in the current MQ schema.
+                    if (string.IsNullOrEmpty(columnName))
+                        continue;
+
+                    if (IsConfiguredColumn(
+                            configDTO.MQExcludeColumn,
+                            columnName))
                     {
-                        var value = prop.GetValue(trial);
-                        row[columnName] = value?.ToString() ?? string.Empty;
+                        continue;
                     }
-                } 
+
+                    // Fail with a useful error instead of DataRow's generic
+                    // "does not belong to table" exception.
+                    if (!table.Columns.Contains(columnName))
+                    {
+                        throw new InvalidOperationException(
+                            $"MQ table column '{columnName}' was not created " +
+                            $"for PendingDataDTO property '{property.Name}'.");
+                    }
+
+                    var value = property.GetValue(pendingData);
+
+                    row[columnName] =
+                        value?.ToString() ?? string.Empty;
+                }
+
                 table.Rows.Add(row);
             }
         }
@@ -255,7 +304,7 @@ namespace IDM.Service.Main.Service
                 foreach (var prop in trialProperties)
                 {
                     var columnName = FormatColumnName(prop.Name, configDTO);
-                    if (!configDTO.MQExcludeColumn.Contains(columnName))
+                    if (!IsConfiguredColumn(configDTO.MQExcludeColumn, columnName))
                     {
                         var value = prop.GetValue(trial);
 
@@ -292,6 +341,34 @@ namespace IDM.Service.Main.Service
             return columnName;
         }
 
+        private string GetPendingMqColumnName(string propertyName, ConfigDTO configDTO)
+        {
+            switch (propertyName)
+            {
+                case nameof(PendingDataDTO.Visual_Appearance_Check):
+                    // The current MQ schema is generated from
+                    // IncomingDataDTO.View_Appearance_Check.
+                    return FormatColumnName(
+                        nameof(IncomingDataDTO.View_Appearance_Check),
+                        configDTO);
+
+                case nameof(PendingDataDTO.Judgement):
+                    // Equivalent property in ParameterDetailDTO.
+                    // Currently excluded through MQExcludeColumn.
+                    return FormatColumnName(
+                        nameof(ParameterDetailDTO.Specs_Judgement),
+                        configDTO);
+
+                case nameof(PendingDataDTO.InspectionValue):
+                    // No equivalent column exists in the current MQ schema.
+                    // Keep this excluded unless MQ defines a destination field.
+                    return null;
+
+                default:
+                    return FormatColumnName(propertyName, configDTO);
+            }
+        }
+
         public async Task<int> MQUpload(DataTable MQDataTable, ConfigDTO configDTO, string transaction)
         {
             try
@@ -323,6 +400,11 @@ namespace IDM.Service.Main.Service
 
         public SubmitResult SendEDCSPC(IEnumerable<PendingDataDTO> pendingData, string operatorId)
         {
+            if (string.IsNullOrWhiteSpace(operatorId))
+            {
+                return SubmitResult.Fail(
+                    "Operator ID is required for EDCSPC submission.");
+            }
             var rows = pendingData?.ToList() ?? new List<PendingDataDTO>();
 
             if (!rows.Any())
