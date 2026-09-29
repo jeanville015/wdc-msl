@@ -45,37 +45,40 @@ namespace IDM.Service.Common.Service
         {
             try
             {
-                string emailContent = BuildEmailHeader("IDM Team", "IDM Data Entry") +
-                                        "<p><span class='warning'>FAILED/OOC</span> for the following:</p>" +
+                string emailContent = BuildEmailHeader(
+                        "SQE Approver",
+                        "IDM Data Entry",
+                        "Good Day,",
+                        "Here is the IDM Data Entry result. That needs your approval.") +
 
-                                        // Basic Material Info Table (20% width)
-                                        "<table class='material-info'>" +
-                                        "<colgroup><col class='col-10'><col class='col-10'></colgroup>" +
-                                        "<tr><th>Field</th><th>Value</th></tr>" +
-                                        $"<tr><td>Material Number</td><td>{incomingData.Material_No}</td></tr>" +
-                                        $"<tr><td>Material Name</td><td>{incomingData.Material_Name}</td></tr>" +
-                                        $"<tr><td>Lot Number Name</td><td>{incomingData.LotNumber}</td></tr>" +
-                                        $"<tr><td>Delivery Date</td><td>{incomingData.Delivery_Date}</td></tr>" +
-                                        $"<tr><td>Received Date</td><td>{incomingData.Received_Date}</td></tr>" +
-                                        "</table>" +
+                        // Basic Material Info Table (20% width)
+                        "<table class='material-info'>" +
+                        "<colgroup><col class='col-10'><col class='col-10'></colgroup>" +
+                        "<tr><th>Field</th><th>Value</th></tr>" +
+                        $"<tr><td>Material Number</td><td>{incomingData.Material_No}</td></tr>" +
+                        $"<tr><td>Material Name</td><td>{incomingData.Material_Name}</td></tr>" +
+                        $"<tr><td>Lot Number Name</td><td>{incomingData.LotNumber}</td></tr>" +
+                        $"<tr><td>Delivery Date</td><td>{incomingData.Delivery_Date}</td></tr>" +
+                        $"<tr><td>Received Date</td><td>{incomingData.Received_Date}</td></tr>" +
+                        "</table>" +
 
-                                        // Parameters Table (100% width)
-                                        "<p><span class='bold'>Parameter Details:</span></p>" +
-                                        "<table class='parameters'>" +
-                                        "<colgroup>" +
-                                        "<col class='col-10'>" +  // Parameter Name
-                                        "<col class='col-10'>" +  // Parameter Value
-                                        "<col style='width:5%;'>" +  // UOM
-                                        "<col style='width:10%;'>" +  // Specs Limit
-                                        "<col style='width:10%;'>" +  // Control Limit
-                                        "<col style='width:5%;'>" +  // Site
-                                        "<col style='width:10%;'>" +  // Judgement
-                                        "<col style='width:10%;'>" +  // Control Judgement
-                                        "</colgroup>" +
-                                        "<tr>" +
-                                        "<th>Parameter Name</th><th>Parameter Value</th><th>UOM</th><th>Specs Limit</th><th>Control Limit</th>" +
-                                        "<th>Site</th><th>Judgement</th><th>Control Judgement</th>" +
-                                        "</tr>";
+                        // Parameters Table (100% width)
+                        "<p><span class='bold'>Parameter Details:</span></p>" +
+                        "<table class='parameters'>" +
+                        "<colgroup>" +
+                        "<col class='col-10'>" +  // Parameter Name
+                        "<col class='col-10'>" +  // Parameter Value
+                        "<col style='width:5%;'>" +  // UOM
+                        "<col style='width:10%;'>" +  // Specs Limit
+                        "<col style='width:10%;'>" +  // Control Limit
+                        "<col style='width:5%;'>" +  // Site
+                        "<col style='width:10%;'>" +  // Judgement
+                        "<col style='width:10%;'>" +  // Control Judgement
+                        "</colgroup>" +
+                        "<tr>" +
+                        "<th>Parameter Name</th><th>Parameter Value</th><th>UOM</th><th>Specs Limit</th><th>Control Limit</th>" +
+                        "<th>Site</th><th>Judgement</th><th>Control Judgement</th>" +
+                        "</tr>";
 
                 // Loop through parameters
                 foreach (var p in incomingData.Parameters)
@@ -94,7 +97,7 @@ namespace IDM.Service.Common.Service
 
                 emailContent += "</table>" + BuildEmailFooter(null);
 
-                var mailModel = await CreateMailViewModel(null, _config.DefaultEmailRecipients, "IDM Data Entry : Failed/OOC", emailContent);
+                var mailModel = await CreateMailViewModel(null, _config.DefaultEmailRecipients, $"SQE Entry Pending for Approval ({incomingData.Material_No})", emailContent);
                 _mailSender.SendMail(mailModel);
 
                 return true;
@@ -159,9 +162,13 @@ namespace IDM.Service.Common.Service
             }
         }
 
-        
-        private string BuildEmailHeader(string recipientName, string emailType)
+
+        private string BuildEmailHeader(string recipientName, string emailType, string greeting = "Good day,", string resultText = null)
         {
+            string resultMessage = string.IsNullOrWhiteSpace(resultText)
+                ? $"Here is the {emailType} result."
+                : resultText;
+
             return "<!DOCTYPE html><html><head>" +
                    "<style>" +
                    "table { border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }" +
@@ -174,8 +181,8 @@ namespace IDM.Service.Common.Service
                    ".success { font-weight: bold; color: green; }" +
                    "</style></head><body>" +
                    $"<p><span class='bold'>Hi {recipientName},</span></p>" +
-                   "<p>Good day,</p>" +
-                   $"<p>Here is the {emailType} result.</p>";
+                   $"<p>{greeting}</p>" +
+                   $"<p>{resultMessage}</p>";
         }
 
         private string BuildEmailFooter( string returnUrl)

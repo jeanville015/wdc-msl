@@ -125,6 +125,17 @@ namespace IDM.Repository.Maintenance.Repository
                     using (var bulkCopy = new SqlBulkCopy(sqlConnection))
                     {
                         bulkCopy.DestinationTableName = "[IDM ].[dbo].[MAINT_Defect]";
+
+                        bulkCopy.ColumnMappings.Add("Analysis", "AnalysisApplicable");
+                        bulkCopy.ColumnMappings.Add("DefectType", "DefectType");
+                        bulkCopy.ColumnMappings.Add("DefectName", "Defect");
+                        bulkCopy.ColumnMappings.Add("_2KxSem", "2KxSem");
+                        bulkCopy.ColumnMappings.Add("Talc", "Talc");
+                        bulkCopy.ColumnMappings.Add("OverAllPhysicalDefect", "OverAllPhysicalDefect");
+                        bulkCopy.ColumnMappings.Add("ActiveFlag", "ActiveFlag");
+                        bulkCopy.ColumnMappings.Add("STOREDBY", "StoredBy");
+                        bulkCopy.ColumnMappings.Add("STORETS", "StoreTs");
+
                         bulkCopy.WriteToServer(defectBulk.DefectDataTable);
                     }
                 }

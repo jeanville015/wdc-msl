@@ -83,7 +83,7 @@ namespace IDM.Web.Controllers.Maintenance
         {
             DataTable dt = new DataTable();
             DefectBulkDTO defectBulk = new DefectBulkDTO();
-            if ((ModelState.IsValid) && (file != null || file.ContentLength > 0))
+            if (ModelState.IsValid && file != null && file.ContentLength > 0)
             {
                 using (var reader = new StreamReader(file.InputStream))
                 {

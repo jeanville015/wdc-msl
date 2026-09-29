@@ -174,9 +174,9 @@ namespace IDM.Web.Controllers.Main
             return PartialView("~/Views/Main/Staging/WImage/_list.cshtml", dynamicStagingTabsView); 
         }
 
-        public async Task<ActionResult> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea)
+        public async Task<ActionResult> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea, int sampleSequence)
         {
-           var data = (await _dynamicStagingService.GetDataStagingDefectAsync(table, amethystJob, analysis, analysisTrial, area, subArea)).ToList();
+           var data = (await _dynamicStagingService.GetDataStagingDefectAsync(table, amethystJob, analysis, analysisTrial, area, subArea, sampleSequence)).ToList();
            if (!data.Any())
            {
                return Content("<div class=\"alert alert-warning mb-0\">No defect data found.</div>");

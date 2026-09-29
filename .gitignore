@@ -2,3 +2,6 @@
 [Oo]bj/
 .vs/
 [Vv]s/
+
+# Local database credentials. Copy the example file and fill in local values.
+/IDM.Web/ConnectionStrings.config

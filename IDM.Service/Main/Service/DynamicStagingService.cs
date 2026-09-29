@@ -49,11 +49,12 @@ namespace IDM.Service.Main.Service
             return entities.Select(entity => _mapper.Map<DynamicStagingDTO>(entity)).ToList();
         }
 
-        public async Task<IEnumerable<DynamicStagingDTO>> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea)
+        public async Task<IEnumerable<DynamicStagingDTO>> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea, int sampleSequence)
         {
-            var entities = await _dynamicStagingRepository.GetDataStagingDefectAsync(table, amethystJob, analysis, analysisTrial, area, subArea);
-            // return entities.Select(entity => _mapper.Map<DynamicStagingDTO>(entity));
-            // Add .ToList() here to force the mapping to happen NOW
+            var entities = await _dynamicStagingRepository.GetDataStagingDefectAsync(
+                table, amethystJob, analysis, analysisTrial,
+                area, subArea, sampleSequence);
+
             return entities.Select(entity => _mapper.Map<DynamicStagingDTO>(entity)).ToList();
         }
 

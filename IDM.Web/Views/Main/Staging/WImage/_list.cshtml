@@ -81,6 +81,7 @@
                                             {
                                                 var area = row.AdditionalProperties.ContainsKey("Area") ? row.AdditionalProperties["Area"] : "";
                                                 var subArea = row.AdditionalProperties.ContainsKey("SubArea") ? row.AdditionalProperties["SubArea"] : "";
+                                                var sampleSequence = row.GetProperty("SampleSequence")?.ToString();
                                                 <!-- Dynamic Thumbnail Injection -->
                                                 <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">
                                                     <!-- Loading Spinner -->
@@ -96,6 +97,7 @@
                                                          data-trial="@Model.AnalysisTrial"
                                                          data-area="@area"
                                                          data-subarea="@subArea"
+                                                         data-sample-sequence="@sampleSequence"
                                                          alt="Preview"
                                                          onload="imageLoaded(this)"
                                                          onerror="imageLoaded(this)" />
@@ -210,12 +212,13 @@
             // 1. Extract parameters from the clicked element
             const path = $(this).data('path');
             const params = {
-                table: 'DATA_STAGING_DEFECT', //hardcode origin of DATA_STAGING_DEFECT 
+                table: 'DATA_STAGING_DEFECT',
                 amethystJob: $(this).data('job'),
                 analysis: $(this).data('analysis'),
                 analysisTrial: $(this).data('trial'),
                 area: $(this).data('area'),
-                subArea: $(this).data('subarea')
+                subArea: $(this).data('subarea'),
+                sampleSequence: $(this).data('sample-sequence')
             };
 
             // 2. Execute specific methods

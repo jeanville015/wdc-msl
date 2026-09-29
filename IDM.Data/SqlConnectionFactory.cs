@@ -9,8 +9,15 @@ namespace IDM.Data
         private readonly string _connectionString;
         public SqlConnectionFactory()
         {
-            //_connectionString = ConfigurationManager.ConnectionStrings["DBConnection"].ConnectionString;
-            _connectionString = "Data Source=PBT-DD-SQLMFG01.AD.SHARED;Initial Catalog=IDM;User ID=idmuser;Password=idM@U$er65894;";
+            var connectionSetting = ConfigurationManager.ConnectionStrings["DBConnection"];
+
+            if (connectionSetting == null || string.IsNullOrWhiteSpace(connectionSetting.ConnectionString))
+            {
+                throw new ConfigurationErrorsException(
+                    "The 'DBConnection' connection string is missing. Configure it in IDM.Web/ConnectionStrings.config.");
+            }
+
+            _connectionString = connectionSetting.ConnectionString;
         }
 
         public IDbConnection CreateConnection()

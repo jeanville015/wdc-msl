@@ -9,8 +9,15 @@ namespace IDM.Data
         private readonly string _connectionString;
         public Db2ConnectionFactory()
         {
-            //_connectionString = ConfigurationManager.ConnectionStrings["DBConnection"].ConnectionString;
-            _connectionString = "Provider=IBMDADB2;Database=SNJWWDB;Hostname=hadrnode02.hgst.com;Protocol=TCPIP;Connect Timeout=180;Port=9900;Uid=sifeats;Pwd=welcome123;";
+            var connectionSetting = ConfigurationManager.ConnectionStrings["DB2Connection"];
+
+            if (connectionSetting == null || string.IsNullOrWhiteSpace(connectionSetting.ConnectionString))
+            {
+                throw new ConfigurationErrorsException(
+                    "The 'DB2Connection' connection string is missing. Configure it in IDM.Web/ConnectionStrings.config.");
+            }
+
+            _connectionString = connectionSetting.ConnectionString;
         }
 
         public IDbConnection CreateConnection()

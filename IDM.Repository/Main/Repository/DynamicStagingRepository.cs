@@ -53,22 +53,31 @@ namespace IDM.Repository.Main.Repository
             }
         }
 
-        public async Task<IEnumerable<DynamicStaging>> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea)
+        public async Task<IEnumerable<DynamicStaging>> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea, int sampleSequence)
         {
             using (var connection = _connectionFactory.CreateConnection())
             {
                 try
                 {
                     var safeTable = FormatSqlIdentifier(table, nameof(table));
-                    var sql = $"SELECT * FROM {safeTable} " +
-                        $"WHERE AmethystJob = @amethystJob " +
-                        $"AND Analysis = @analysis " +
-                        $"AND AnalysisTrial = @analysisTrial " +
-                        $"AND Area = @area " +
-                        $"AND SubArea = @subArea";
 
-                    // Get dynamic data first
-                    var dynamicData = await connection.QueryAsync(sql, new { amethystJob, analysis, analysisTrial, area, subArea });
+                    var sql = $"SELECT * FROM {safeTable} " +
+                        "WHERE AmethystJob = @amethystJob " +
+                        "AND Analysis = @analysis " +
+                        "AND AnalysisTrial = @analysisTrial " +
+                        "AND Area = @area " +
+                        "AND SubArea = @subArea " +
+                        "AND SampleSequence = @sampleSequence";
+
+                    var dynamicData = await connection.QueryAsync(sql, new
+                    {
+                        amethystJob,
+                        analysis,
+                        analysisTrial,
+                        area,
+                        subArea,
+                        sampleSequence
+                    });
 
                     // Convert to DynamicStaging objects
                     var result = new List<DynamicStaging>();

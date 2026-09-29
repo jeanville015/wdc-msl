@@ -12,7 +12,7 @@ namespace IDM.Service.Main.Interface
     public interface IDynamicStagingService
     {
         Task<IEnumerable<DynamicStagingDTO>> GetByJobAndAnalysisAsync(string table, string amethystJob, string analysis, int analysisTrial);
-        Task<IEnumerable<DynamicStagingDTO>> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea);
+        Task<IEnumerable<DynamicStagingDTO>> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea, int sampleSequence);
         Task<IEnumerable<DynamicStagingDTO>> GetDataStagingDefectWithDataStagingWImageParamsAsync(string table, string amethystJob, string analysis, int analysisTrial);
         Task<DataTable> GetByJobAndAnalysisDataTableAsync(string table, string amethystJob, string analysis, int analysisTrial);
         Task<bool> SetApprovalAsync(string table, string amethystJob, string analysis, int analysisTrial, string status, string toolName, object tableData, string updatedBy);

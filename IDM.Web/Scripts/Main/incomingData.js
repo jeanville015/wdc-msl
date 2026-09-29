@@ -506,14 +506,6 @@ var IncomingDataModule = (function () {
                 ToastrHelper.notification("error", "Received date is required.", "Validation");
                 return;
             }
-            if (!formData.manufacturing_Date) {
-                ToastrHelper.notification("error", "Manufacturing date is required.", "Validation");
-                return;
-            }
-            if (!formData.expiration_Date) {
-                ToastrHelper.notification("error", "Expiration date is required.", "Validation");
-                return;
-            }
             if (!formData.receivedBy || formData.receivedBy === '0') {
                 ToastrHelper.notification("error", "Received by is required.", "Validation");
                 return;
