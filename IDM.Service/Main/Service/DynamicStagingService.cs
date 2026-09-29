@@ -95,16 +95,22 @@ namespace IDM.Service.Main.Service
         {
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
 
-            bool setItemStatus = true;
-            setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
-            if (setItemStatus == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Updating of the item status was unsuccessful" }; }
-
             DataTable emailDataTable = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
             string materialNo = GetColumnValue(emailDataTable.Rows.Cast<DataRow>().FirstOrDefault(), "Material_No", "MaterialNumber", "MATERIAL_NO", "MATERIALNUMBER");
             var approvalEmailData = await _dynamicStagingRepository.GetApprovalEmailDataAsync(materialNo);
 
             if (status == "REJECTED")
             {
+                bool setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
+                if (!setItemStatus)
+                {
+                    return new OperationResult
+                    {
+                        OperationStatus = false,
+                        OperationStatusMessage = "Updating of the item status was unsuccessful"
+                    };
+                }
+
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
                 var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, approvalEmailData);
                 if (resultEmailSendRejectionEmail)
@@ -138,11 +144,27 @@ namespace IDM.Service.Main.Service
                 var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
                 var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl, approvalEmailData);
-                if (resultEmailSendApproveEmail)
+                if (!resultEmailSendApproveEmail)
                 {
-                    result.OperationStatus = true;
-                    result.OperationStatusMessage = "Set Approval Successful!";
+                    return new OperationResult
+                    {
+                        OperationStatus = false,
+                        OperationStatusMessage = "Approval email could not be sent. The item status was not changed."
+                    };
                 }
+
+                bool setItemStatus = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, null, userId);
+                if (!setItemStatus)
+                {
+                    return new OperationResult
+                    {
+                        OperationStatus = false,
+                        OperationStatusMessage = "Approval processing completed, but updating the item status was unsuccessful."
+                    };
+                }
+
+                result.OperationStatus = true;
+                result.OperationStatusMessage = "Set Approval Successful!";
             }
 
             //no errors on executed process above
@@ -542,29 +564,29 @@ namespace IDM.Service.Main.Service
                         //NewURL = urlBase + imageExtracted
                     });
 
-                    // Annotation Object
+                    // Annotation Object - optional
                     string annoPath = GetVal("Annotation");
-                    string annoExtracted = Path.GetFileName(annoPath);
-                    StagingWImageMainBDPDirectories_Annotation.Add(new BDPUploadVariables
+                    if (!string.IsNullOrWhiteSpace(annoPath))
                     {
-                        //ObjectId = currentId,
-                        //DataName = mainDataName,
-                        _DataIdValuePair = new DataIdValuePair
+                        string annoExtracted = Path.GetFileName(annoPath);
+                        StagingWImageMainBDPDirectories_Annotation.Add(new BDPUploadVariables
                         {
-                            IdName = mainDataName,
-                            IdValue = currentId
-                        },
-                        _DataNameValuePair = new DataNameValuePair
-                        {
-                            DataName = "BDPAnnotationPath",
-                            DataValue = urlBase + annoExtracted
-                        },
-                        OriginFileDirectory = annoPath,
-                        FileDirectory = commonDir,
-                        FileName = commonFileName,
-                        ExtractedFileName = annoExtracted,
-                        //NewURL = urlBase + annoExtracted
-                    });
+                            _DataIdValuePair = new DataIdValuePair
+                            {
+                                IdName = mainDataName,
+                                IdValue = currentId
+                            },
+                            _DataNameValuePair = new DataNameValuePair
+                            {
+                                DataName = "BDPAnnotationPath",
+                                DataValue = urlBase + annoExtracted
+                            },
+                            OriginFileDirectory = annoPath,
+                            FileDirectory = commonDir,
+                            FileName = commonFileName,
+                            ExtractedFileName = annoExtracted
+                        });
+                    }
                 }
 
                 // 2. Process Details (SEM and EDX)
@@ -591,29 +613,29 @@ namespace IDM.Service.Main.Service
 
                     string urlBase = $"{configDTO.BdpUploadCommonURL}{yearMonth}%2F{GetDet("Analysis")}%2F{GetPar("SampleClass")}%2F{GetPar("SampleType")}%2F{GetDet("AmethystJob")}%2F{GetDet("SampleSequence")}%2F";
 
-                    // SEM
+                    // SEM - optional
                     string semPath = GetDet("SemImage");
-                    string semExtracted = Path.GetFileName(semPath);
-                    StagingWImageDetailsBDPDirectories_Sem.Add(new BDPUploadVariables
+                    if (!string.IsNullOrWhiteSpace(semPath))
                     {
-                        //ObjectId = detailId,
-                        //DataName = detailsDataIdPropertyName,
-                        _DataIdValuePair = new DataIdValuePair
+                        string semExtracted = Path.GetFileName(semPath);
+                        StagingWImageDetailsBDPDirectories_Sem.Add(new BDPUploadVariables
                         {
-                            IdName = detailsDataIdPropertyName,
-                            IdValue = detailId
-                        },
-                        _DataNameValuePair = new DataNameValuePair
-                        {
-                            DataName = "BDPSemImagePath",
-                            DataValue = urlBase + semExtracted
-                        },
-                        OriginFileDirectory = semPath,
-                        FileDirectory = detailDir,
-                        FileName = detailFileName,
-                        ExtractedFileName = semExtracted,
-                        //NewURL = urlBase + semExtracted
-                    });
+                            _DataIdValuePair = new DataIdValuePair
+                            {
+                                IdName = detailsDataIdPropertyName,
+                                IdValue = detailId
+                            },
+                            _DataNameValuePair = new DataNameValuePair
+                            {
+                                DataName = "BDPSemImagePath",
+                                DataValue = urlBase + semExtracted
+                            },
+                            OriginFileDirectory = semPath,
+                            FileDirectory = detailDir,
+                            FileName = detailFileName,
+                            ExtractedFileName = semExtracted
+                        });
+                    }
 
                     // EDX
                     string edxPath = GetDet("EdxImage");
