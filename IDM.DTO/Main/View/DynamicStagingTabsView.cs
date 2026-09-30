@@ -18,6 +18,7 @@ namespace IDM.DTO.Main.View
         public string DateReviewed { get; set; }
         public string ReviewedBy { get; set; }
         public string Tool { get; set; }
+        public bool HasUnavailableImage { get; set; }
 
         // Dynamic headers for the table
         public List<string> DynamicHeaders { get; set; }

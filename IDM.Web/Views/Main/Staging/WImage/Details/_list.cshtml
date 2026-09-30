@@ -39,7 +39,7 @@
                             var cellValue = row.AdditionalProperties.ContainsKey(h) ? row.AdditionalProperties[h]?.ToString() : "";
 
                             <td class="px-3 align-middle">
-                                @if (h.Equals("SemImage", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cellValue))
+                                @if (h.Equals("SemImage", StringComparison.OrdinalIgnoreCase))
                                 {
                                     <!-- Dynamic Thumbnail Injection -->
                                     <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">
@@ -56,7 +56,7 @@
                                     </div>
                                     
                                 }
-                                else if (h.Equals("EdxImage", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cellValue))
+                                else if (h.Equals("EdxImage", StringComparison.OrdinalIgnoreCase))
                                 {
                                     <!-- Dynamic Thumbnail Injection -->
                                     <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">

@@ -17,8 +17,7 @@ var StagingModule = (function () {
     // Helper function to control UI based on source
     function controlUIBasedOnSource(source) {
         if (source !== 'wdcx01') {
-            // Disable approve and reject buttons
-            $('#approve-btn').prop('disabled', true).addClass('disabled');
+            // Keep the existing source restriction for rejection.
             $('#reject-btn').prop('disabled', true).addClass('disabled');
             
             // Hide the sidebar
@@ -193,6 +192,12 @@ var StagingModule = (function () {
                                 }
                                 // Populate the div with the returned HTML (Partial View)
                                 $("#partialContent").html(dataResponse);
+
+                                const imageStatus = $('#partialContent [data-has-unavailable-image]').attr('data-has-unavailable-image');
+                                const canApprove = imageStatus === 'false';
+                                $('#approve-btn').data('imagesAvailable', canApprove)
+                                    .prop('disabled', !canApprove)
+                                    .toggleClass('disabled', !canApprove);
 
                                 //loadStagingData_Table(dataResponse);
 
@@ -466,6 +471,10 @@ var StagingModule = (function () {
 
         $(document).on('click', '#approve-btn', function (e) {
             e.preventDefault();
+
+            if (this.disabled || $(this).hasClass('disabled') || $(this).data('imagesAvailable') !== true) {
+                return;
+            }
 
             const status = 'PASSED';
             approvalFunction(status)

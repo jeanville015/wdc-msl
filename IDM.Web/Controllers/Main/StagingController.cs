@@ -166,12 +166,22 @@ namespace IDM.Web.Controllers.Main
                 DateReviewed = first.GetProperty("DateReviewed")?.ToString(),
                 ReviewedBy = await _userService.GetUserNameAsync(first.GetProperty("ReviewedBy")?.ToString()),
                 Tool = first.GetProperty("Tool")?.ToString(),
-                DynamicHeaders = first.AdditionalProperties.Keys.Where(k => allowedDynamicColumns.Contains(k)).ToList(),
+                HasUnavailableImage = HasBlankOrMissingImage(data),
+                DynamicHeaders = allowedDynamicColumns.ToList(),
                 GroupedData = grouped,
                 TabLabels = tabLabels 
             };
 
             return PartialView("~/Views/Main/Staging/WImage/_list.cshtml", dynamicStagingTabsView); 
+        }
+
+        private static bool HasBlankOrMissingImage(IEnumerable<DTO.Main.DynamicStagingDTO> rows)
+        {
+            return rows.Any(row =>
+            {
+                var imagePath = row.GetProperty("Image")?.ToString();
+                return string.IsNullOrWhiteSpace(imagePath) || !System.IO.File.Exists(imagePath);
+            });
         }
 
         public async Task<ActionResult> GetDataStagingDefectAsync(string table, string amethystJob, string analysis, int analysisTrial, string area, string subArea, int sampleSequence)
@@ -197,8 +207,7 @@ namespace IDM.Web.Controllers.Main
                 Area = first.GetProperty("Area")?.ToString(),
                 SubArea = first.GetProperty("SubArea")?.ToString(),
 
-                DynamicHeaders = first.AdditionalProperties.Keys
-                                      .Where(k => allowedDynamicColumns.Contains(k)).ToList(),
+                DynamicHeaders = allowedDynamicColumns.ToList(),
 
                 Data = data.OrderBy(x => x.AdditionalProperties.ContainsKey("SampleSequence")
                                      ? x.AdditionalProperties["SampleSequence"]?.ToString()
@@ -269,6 +278,15 @@ namespace IDM.Web.Controllers.Main
                 if (status != "PASSED" && status != "REJECTED")
                 {
                     return Json(new { success = false, message = "Invalid approval status." }, JsonRequestBehavior.AllowGet);
+                }
+
+                if (status == "PASSED")
+                {
+                    var stagingRows = (await _dynamicStagingService.GetByJobAndAnalysisAsync(sourceTable, amethystJob, analysis, analysisTrial)).ToList();
+                    if (!stagingRows.Any() || HasBlankOrMissingImage(stagingRows))
+                    {
+                        return Json(new { success = false, message = "Cannot approve: at least one Image is blank or unavailable." }, JsonRequestBehavior.AllowGet);
+                    }
                 }
 
                 // will removed the unnecessary 'Ad/' on the value

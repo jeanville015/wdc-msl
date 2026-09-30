@@ -7,7 +7,7 @@
 @if (Model != null)
 {
     <!-- Static Header Container -->
-    <div class="card bg-light mb-3">
+    <div class="card bg-light mb-3" data-has-unavailable-image="@Model.HasUnavailableImage.ToString().ToLowerInvariant()">
         <div class="card-body py-2">
             <!-- 'row' naturally aligns left; 'no-gutters' keeps them tight -->
             <div class="row no-gutters">
@@ -60,7 +60,7 @@
                                         var cellValue = row.AdditionalProperties.ContainsKey(h) ? row.AdditionalProperties[h]?.ToString() : "";
 
                                         <td>
-                                            @if (h.Equals("Image", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(cellValue))
+                                            @if (h.Equals("Image", StringComparison.OrdinalIgnoreCase))
                                             {
                                                 <!-- Dynamic Thumbnail Injection -->
                                                 <div class="img-container" style="height: 80px; min-width: 80px; position: relative; display: inline-block; vertical-align: top;">
