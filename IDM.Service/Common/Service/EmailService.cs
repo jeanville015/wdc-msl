@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace IDM.Service.Common.Service
@@ -173,6 +174,7 @@ namespace IDM.Service.Common.Service
                    "<style>" +
                    "table { border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }" +
                    ".parameters { width: 70%; }" +
+                   ".defect-details { width: 100%; }" +
                    ".material-info { width: 20%; margin-left: 0; }" +
                    ".col-10 { width: 10%; }" +
                    "th, td { border: 1px solid black; padding: 4px; text-align: left; }" +
@@ -242,6 +244,36 @@ namespace IDM.Service.Common.Service
                 $"<tr><td>Delivery Date</td><td>{data.DeliveryDate}</td></tr>" +
                 $"<tr><td>Received Date</td><td>{data.ReceivedDate}</td></tr>" +
                 "</table>";
+
+            if (data.ImageTabs != null)
+            {
+                foreach (var tab in data.ImageTabs)
+                {
+                    html += $"<p><span class='bold'>{WebUtility.HtmlEncode(tab.Product)}</span></p>";
+
+                    if (tab.Defects == null || tab.Defects.Count == 0)
+                    {
+                        html += "<p>No defect recorded.</p>";
+                        continue;
+                    }
+
+                    html += "<table class='defect-details'>" +
+                            "<tr><th>DefectGroup</th><th>Defect</th><th>BDPSemImagePath</th></tr>";
+
+                    foreach (var defect in tab.Defects)
+                    {
+                        html += "<tr>" +
+                                $"<td>{WebUtility.HtmlEncode(defect.DefectGroup)}</td>" +
+                                $"<td>{WebUtility.HtmlEncode(defect.Defect)}</td>" +
+                                $"<td style='word-break:break-all'>{WebUtility.HtmlEncode(defect.BDPSemImagePath)}</td>" +
+                                "</tr>";
+                    }
+
+                    html += "</table>";
+                }
+
+                return html;
+            }
 
             html += "<p><span class='bold'>Parameter Details:</span></p>" +
                     "<table class='parameters'>" +

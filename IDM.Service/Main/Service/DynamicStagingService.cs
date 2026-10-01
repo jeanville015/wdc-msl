@@ -4,6 +4,7 @@ using IDM.DTO.Main;
 using IDM.Model;
 using IDM.Model.Common;
 using IDM.Model.Main;
+using IDM.Model.Main.Email;
 using IDM.Model.Maintenance;
 using IDM.Repository.Main.Interface;
 using IDM.Service.Common.Interface;
@@ -111,6 +112,8 @@ namespace IDM.Service.Main.Service
                     };
                 }
 
+                approvalEmailData.ImageTabs = await BuildApprovalEmailTabsAsync(sourceTable, amethystJob, analysis, analysisTrial);
+
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
                 var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, approvalEmailData);
                 if (resultEmailSendRejectionEmail)
@@ -141,6 +144,8 @@ namespace IDM.Service.Main.Service
                 OperationResult executeBDPRequirementsProcess = await ExecuteBDPRequirementsProcess(sourceTable, amethystJob, analysis, analysisTrial, configDTO);
                 if (executeBDPRequirementsProcess.OperationStatus == false) { return executeBDPRequirementsProcess; }
 
+                approvalEmailData.ImageTabs = await BuildApprovalEmailTabsAsync(sourceTable, amethystJob, analysis, analysisTrial);
+
                 var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
                 var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl, approvalEmailData);
@@ -169,6 +174,71 @@ namespace IDM.Service.Main.Service
 
             //no errors on executed process above
             return result;
+        }
+
+        private async Task<List<ApprovalEmailTabData>> BuildApprovalEmailTabsAsync(string sourceTable, string amethystJob, string analysis, int analysisTrial)
+        {
+            var stagingRows = (await GetByJobAndAnalysisAsync(sourceTable, amethystJob, analysis, analysisTrial)).ToList();
+            var groups = stagingRows
+                .GroupBy(row => row.GetProperty("SampleSequence")?.ToString() ?? "Unknown")
+                .OrderBy(group =>
+                {
+                    int sequence;
+                    return int.TryParse(group.Key, out sequence) ? sequence : int.MaxValue;
+                });
+
+            var tabs = new List<ApprovalEmailTabData>();
+
+            foreach (var group in groups)
+            {
+                var tab = new ApprovalEmailTabData
+                {
+                    SampleSequence = group.Key,
+                    Product = group.First().GetProperty("Product")?.ToString()
+                };
+
+                int sampleSequence;
+                if (int.TryParse(group.Key, out sampleSequence))
+                {
+                    var locations = group
+                        .Where(row => !string.IsNullOrWhiteSpace(row.GetProperty("Annotation")?.ToString()))
+                        .Select(row => new
+                        {
+                            Area = row.GetProperty("Area")?.ToString(),
+                            SubArea = row.GetProperty("SubArea")?.ToString()
+                        })
+                        .Where(location => location.Area != null && location.SubArea != null)
+                        .Distinct()
+                        .ToList();
+
+                    var seenDefectIds = new HashSet<string>();
+
+                    foreach (var location in locations)
+                    {
+                        var defects = await GetDataStagingDefectAsync(
+                            "DATA_STAGING_DEFECT", amethystJob, analysis, analysisTrial,
+                            location.Area, location.SubArea, sampleSequence);
+
+                        foreach (var defect in defects)
+                        {
+                            var defectId = defect.GetProperty("StagingDefectId")?.ToString();
+                            if (defectId == null || !seenDefectIds.Add(defectId))
+                                continue;
+
+                            tab.Defects.Add(new ApprovalEmailDefectData
+                            {
+                                DefectGroup = defect.GetProperty("DefectGroup")?.ToString(),
+                                Defect = defect.GetProperty("Defect")?.ToString(),
+                                BDPSemImagePath = defect.GetProperty("BDPSemImagePath")?.ToString()
+                            });
+                        }
+                    }
+                }
+
+                tabs.Add(tab);
+            }
+
+            return tabs;
         }
 
         public async Task<OperationResult> ProcessApprovalWithNotificationAsync(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, object tableData, string userId, ConfigDTO config, string returnUrl = null)

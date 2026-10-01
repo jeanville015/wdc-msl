@@ -14,6 +14,7 @@ namespace IDM.Model.Main.Email
         public string DeliveryDate { get; set; }
         public string ReceivedDate { get; set; }
         public List<ParameterDetails> ParameterDetails { get; set; } = new List<ParameterDetails>();
+        public List<ApprovalEmailTabData> ImageTabs { get; set; }
     }
 
     public class ParameterDetails
@@ -26,5 +27,19 @@ namespace IDM.Model.Main.Email
         public string SiteName { get; set; }
         public string Judgement { get; set; }
         public string ControlJudgement { get; set; }
+    }
+
+    public class ApprovalEmailTabData
+    {
+        public string SampleSequence { get; set; }
+        public string Product { get; set; }
+        public List<ApprovalEmailDefectData> Defects { get; set; } = new List<ApprovalEmailDefectData>();
+    }
+
+    public class ApprovalEmailDefectData
+    {
+        public string DefectGroup { get; set; }
+        public string Defect { get; set; }
+        public string BDPSemImagePath { get; set; }
     }
 }
