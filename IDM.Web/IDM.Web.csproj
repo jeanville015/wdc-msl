@@ -2654,6 +2654,7 @@
     <Content Include="Scripts\site.js" />
     <Content Include="Scripts\User\account.js" />
     <Content Include="Scripts\User\role.js" />
+    <Content Include="ConnectionStrings.config" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

@@ -231,7 +231,7 @@ namespace IDM.Web.Controllers.Main
         /// <param name="tableContent"></param> 
         /// <returns></returns>
         [HttpPost]
-        public async Task<JsonResult> SetApproval(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent)
+        public async Task<JsonResult> SetApproval(string sourceTable, string table, string amethystJob, string analysis, int analysisTrial, string analyzedBy, string status, string tableContent, string returnUrl)
         {
 
             try
@@ -250,7 +250,7 @@ namespace IDM.Web.Controllers.Main
 
                 // will removed the unnecessary 'Ad/' on the value
                 analyzedBy = SanitizeAdUserId(analyzedBy);
-                var result = await _dynamicStagingService.ProcessApprovalWithNotificationAsync(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableData, UserId, config); 
+                var result = await _dynamicStagingService.ProcessApprovalWithNotificationAsync(sourceTable, table, amethystJob, analysis, analysisTrial, analyzedBy, status, tableData, UserId, config, returnUrl); 
 
                 if (!result.OperationStatus)
                 {

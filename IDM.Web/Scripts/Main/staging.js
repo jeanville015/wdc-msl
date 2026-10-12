@@ -369,7 +369,8 @@ var StagingModule = (function () {
                                 analysisTrial: params.analysisTrial,
                                 analyzedBy: params.analyzedBy,
                                 status: status,
-                                tableContent: JSON.stringify(tableData)
+                                tableContent: JSON.stringify(tableData),
+                                returnUrl: window.location.href
                             },
                             success: function (dataResponse) {
                                 if (dataResponse.success) {

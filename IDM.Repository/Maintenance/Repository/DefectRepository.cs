@@ -133,8 +133,12 @@ namespace IDM.Repository.Maintenance.Repository
                         bulkCopy.ColumnMappings.Add("Talc", "Talc");
                         bulkCopy.ColumnMappings.Add("OverAllPhysicalDefect", "OverAllPhysicalDefect");
                         bulkCopy.ColumnMappings.Add("ActiveFlag", "ActiveFlag");
-                        bulkCopy.ColumnMappings.Add("STOREDBY", "StoredBy");
-                        bulkCopy.ColumnMappings.Add("STORETS", "StoreTs");
+                        bulkCopy.ColumnMappings.Add("STOREDBY", "STOREDBY");
+                        bulkCopy.ColumnMappings.Add("STORETS", "STORETS");
+                        foreach (DataRow row in defectBulk.DefectDataTable.Rows)
+                        {
+                            row["ActiveFlag"] = 'Y';
+                        }
 
                         bulkCopy.WriteToServer(defectBulk.DefectDataTable);
                     }

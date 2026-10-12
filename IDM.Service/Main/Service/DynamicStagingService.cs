@@ -245,6 +245,22 @@ namespace IDM.Service.Main.Service
         {
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
 
+            DataTable emailDataTable = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+            string materialNo = GetColumnValue(
+                emailDataTable.Rows.Cast<DataRow>().FirstOrDefault(),
+                "Material_No", "MaterialNumber", "MATERIAL_NO", "MATERIALNUMBER");
+
+            if (string.IsNullOrWhiteSpace(materialNo))
+            {
+                return new OperationResult
+                {
+                    OperationStatus = false,
+                    OperationStatusMessage = "Material number is missing; approval email data cannot be generated."
+                };
+            }
+
+            var approvalEmailData = await _dynamicStagingRepository.GetApprovalEmailDataAsync(materialNo);
+
             // set actual status if APPROVED or REJECTED
             var resultSetDecision = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, userId);
             if (resultSetDecision == false) { return result = new OperationResult() { OperationStatus = false, OperationStatusMessage = "Updating of the item status was unsuccessful" }; }
@@ -252,7 +268,7 @@ namespace IDM.Service.Main.Service
             if (status == "REJECTED")
             {
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
-                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId);
+                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, approvalEmailData);
                 if (resultEmailSendRejectionEmail) 
                 {
                     result.OperationStatus = true;
@@ -264,7 +280,7 @@ namespace IDM.Service.Main.Service
             { 
                 // MQ upload (previously inline in controller)
                 string[] excludedFields = { "UPDATEDBY", "UPDATEDTS", "STOREDBY", "STORETS" };
-                DataTable dataTableMain = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
+                DataTable dataTableMain = emailDataTable;
                 OperationResult mqResult = await PrepareMQInputDataTable(dataTableMain, sourceTable, table, userId, config, excludedFields);
 
                 if (!mqResult.OperationStatus)
@@ -275,7 +291,7 @@ namespace IDM.Service.Main.Service
                 // 3. Approval email
                 var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
-                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl);
+                var resultEmailSendApproveEmail = await _emailService.SendApprovalEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, customer, returnUrl, approvalEmailData);
                 if (resultEmailSendApproveEmail) 
                 {
                     result.OperationStatus = true;
