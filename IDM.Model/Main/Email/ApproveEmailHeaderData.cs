@@ -15,6 +15,20 @@ namespace IDM.Model.Main.Email
         public string ReceivedDate { get; set; }
         public List<ParameterDetails> ParameterDetails { get; set; } = new List<ParameterDetails>();
         public List<ApprovalEmailTabData> ImageTabs { get; set; }
+        public ApprovalEmailStagingData NonImageStaging { get; set; }
+    }
+
+    public class ApprovalEmailStagingData
+    {
+        public List<ApprovalEmailFieldData> HeaderFields { get; set; } = new List<ApprovalEmailFieldData>();
+        public List<string> DetailColumns { get; set; } = new List<string>();
+        public List<List<string>> DetailRows { get; set; } = new List<List<string>>();
+    }
+
+    public class ApprovalEmailFieldData
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
     }
 
     public class ParameterDetails

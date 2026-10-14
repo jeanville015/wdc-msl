@@ -120,7 +120,7 @@ namespace IDM.Service.Common.Service
 
                 string emailContent = BuildEmailHeader(recipientName, "MSL Data") +
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='warning'>{status}</span> by Ma'am/Sir {approverName}</p>" +
-                                        BuildApprovalEmailDataSection(approvalEmailData) +
+                                        BuildApprovalEmailDataSection(approvalEmailData, analysis, recipientName) +
                                         BuildEmailFooter(null);
 
                 var mailModel = await CreateMailViewModel(userList, recipientEmail, "MSL Web System : FAILED", emailContent);
@@ -148,7 +148,7 @@ namespace IDM.Service.Common.Service
 
                 string emailContent = BuildEmailHeader(recipientName, "MSL Data") +
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='success'>{status}</span> by Ma'am/Sir {approverName}</p>" +
-                                        BuildApprovalEmailDataSection(approvalEmailData) +
+                                        BuildApprovalEmailDataSection(approvalEmailData, analysis, recipientName) +
                                         BuildEmailFooter(returnUrl);
 
                 var mailModel = await CreateMailViewModel(userList, allRecipients, "MSL Web System : APPROVED", emailContent);
@@ -230,10 +230,44 @@ namespace IDM.Service.Common.Service
             };
         }
 
-        private string BuildApprovalEmailDataSection(ApprovalEmailHeaderData data)
+        private string BuildApprovalEmailDataSection(ApprovalEmailHeaderData data, string analysis, string recipientName)
         {
             if (data == null)
                 return string.Empty;
+
+            if (data.NonImageStaging != null)
+            {
+                var staging = data.NonImageStaging;
+                string stagingHtml = $"<p><span class='bold'>{WebUtility.HtmlEncode(analysis)} Details</span></p><p>";
+
+                foreach (var field in staging.HeaderFields)
+                {
+                    string value = string.Equals(field.Name, "AnalyzedBy", StringComparison.OrdinalIgnoreCase)
+                        ? recipientName
+                        : field.Value;
+
+                    stagingHtml += $"<strong>{WebUtility.HtmlEncode(field.Name.ToUpperInvariant())}:</strong> " +
+                                   $"{WebUtility.HtmlEncode(value)}&nbsp;&nbsp;";
+                }
+
+                stagingHtml += "</p><table class='defect-details'><tr>";
+                foreach (string column in staging.DetailColumns)
+                    stagingHtml += $"<th>{WebUtility.HtmlEncode(column.ToUpperInvariant())}</th>";
+                stagingHtml += "</tr>";
+
+                foreach (var row in staging.DetailRows)
+                {
+                    stagingHtml += "<tr>";
+                    for (int i = 0; i < staging.DetailColumns.Count; i++)
+                    {
+                        string value = i < row.Count ? row[i] : string.Empty;
+                        stagingHtml += $"<td>{WebUtility.HtmlEncode(value)}</td>";
+                    }
+                    stagingHtml += "</tr>";
+                }
+
+                return stagingHtml + "</table>";
+            }
 
             var html =
                 "<table class='material-info'>" +

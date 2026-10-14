@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -246,20 +247,19 @@ namespace IDM.Service.Main.Service
             var result = new OperationResult() { OperationStatus = true, OperationStatusMessage = "Set Approval Successful!" };
 
             DataTable emailDataTable = await GetByJobAndAnalysisDataTableAsync(sourceTable, amethystJob, analysis, analysisTrial);
-            string materialNo = GetColumnValue(
-                emailDataTable.Rows.Cast<DataRow>().FirstOrDefault(),
-                "Material_No", "MaterialNumber", "MATERIAL_NO", "MATERIALNUMBER");
-
-            if (string.IsNullOrWhiteSpace(materialNo))
+            if (emailDataTable.Rows.Count == 0)
             {
                 return new OperationResult
                 {
                     OperationStatus = false,
-                    OperationStatusMessage = "Material number is missing; approval email data cannot be generated."
+                    OperationStatusMessage = "No staging data found for the approval email."
                 };
             }
 
-            var approvalEmailData = await _dynamicStagingRepository.GetApprovalEmailDataAsync(materialNo);
+            var approvalEmailData = new ApprovalEmailHeaderData
+            {
+                NonImageStaging = BuildNonImageStagingEmailData(emailDataTable)
+            };
 
             // set actual status if APPROVED or REJECTED
             var resultSetDecision = await SetApprovalAsync(table, amethystJob, analysis, analysisTrial, status, analyzedBy, tableData, userId);
@@ -898,6 +898,79 @@ namespace IDM.Service.Main.Service
             }
 
             return operationResult;
+        }
+
+        private static ApprovalEmailStagingData BuildNonImageStagingEmailData(DataTable table)
+        {
+            DataRow firstRow = table.Rows[0];
+            var ordered = new List<DataColumn>();
+            var audit = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "StoredBy", "StoreTs", "UpdatedBy", "UpdatedTs"
+            };
+
+            foreach (string name in new[] { "AmethystJob", "Analysis" })
+            {
+                DataColumn column = table.Columns.Cast<DataColumn>()
+                    .FirstOrDefault(c => string.Equals(c.ColumnName, name, StringComparison.OrdinalIgnoreCase));
+                if (column != null)
+                    ordered.Add(column);
+            }
+
+            foreach (DataColumn column in table.Columns)
+            {
+                if (ordered.Contains(column) ||
+                    audit.Contains(column.ColumnName) ||
+                    column.ColumnName.EndsWith("Id", StringComparison.OrdinalIgnoreCase) ||
+                    firstRow.IsNull(column))
+                    continue;
+
+                ordered.Add(column);
+            }
+
+            var staging = new ApprovalEmailStagingData();
+            foreach (DataColumn column in ordered.Take(8))
+            {
+                if (string.Equals(column.ColumnName, "AnalysisTrial", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string value = FormatStagingEmailValue(firstRow, column);
+                staging.HeaderFields.Add(new ApprovalEmailFieldData
+                {
+                    Name = column.ColumnName,
+                    Value = string.IsNullOrEmpty(value) ? "N/A" : value
+                });
+            }
+
+            var detailColumns = ordered.Skip(8).ToList();
+            staging.DetailColumns = detailColumns.Select(c => c.ColumnName).ToList();
+            staging.DetailRows = table.Rows.Cast<DataRow>()
+                .Select(row => detailColumns
+                    .Select(column => FormatStagingEmailValue(row, column))
+                    .ToList())
+                .ToList();
+
+            return staging;
+        }
+
+        private static string FormatStagingEmailValue(DataRow row, DataColumn column)
+        {
+            object value = row[column];
+            if (value == null || value == DBNull.Value)
+                return string.Empty;
+
+            string name = column.ColumnName;
+            if (name.IndexOf("date", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("time", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                if (value is DateTime date)
+                    return date.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));
+            }
+
+            if (value is decimal number)
+                return number.ToString("G29", CultureInfo.InvariantCulture);
+
+            return Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
         }
 
         private static string GetColumnValue(DataRow row, params string[] possibleNames)
