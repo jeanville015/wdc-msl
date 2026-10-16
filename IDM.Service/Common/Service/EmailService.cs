@@ -110,7 +110,7 @@ namespace IDM.Service.Common.Service
             }
         }
 
-        public async Task<bool> SendRejectionEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, ApprovalEmailHeaderData approvalEmailData = null)
+        public async Task<bool> SendRejectionEmailAsync(IEnumerable<string> userList, string analyzedBy, string job, string analysis, int analysisTrial, string status, string approver, ApprovalEmailHeaderData approvalEmailData = null, string customer = null)
         {
             try
             {
@@ -118,12 +118,52 @@ namespace IDM.Service.Common.Service
                 string approverName = await _userService.GetUserNameAsync(approver);
                 string recipientEmail = await _userService.GetUserEmailAsync(analyzedBy);
 
-                string emailContent = BuildEmailHeader(recipientName, "MSL Data") +
+                string allRecipients = recipientEmail;
+                bool isNonImageAnalysis = approvalEmailData?.NonImageStaging != null ||
+                    new[] { "Gravimetry", "IC Anion", "PH", "PSD" }
+                    .Any(name => string.Equals(
+                        name,
+                        analysis?.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+
+                if (isNonImageAnalysis)
+                {
+                    string rejectorEmail = await _userService.GetUserEmailAsync(approver);
+                    allRecipients = string.Join(", ", new[] { rejectorEmail, recipientEmail }
+                        .Where(email => !string.IsNullOrWhiteSpace(email))
+                        .Select(email => email.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase));
+                }
+
+                string emailContent = BuildEmailHeader(recipientName, "MSL Data", analysis: analysis) +
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='warning'>{status}</span> by Ma'am/Sir {approverName}</p>" +
                                         BuildApprovalEmailDataSection(approvalEmailData, analysis, recipientName) +
                                         BuildEmailFooter(null);
 
-                var mailModel = await CreateMailViewModel(userList, recipientEmail, "MSL Web System : FAILED", emailContent);
+                var mailModel = await CreateMailViewModel(userList, allRecipients, "MSL Web System : FAILED", emailContent);
+
+                if (isNonImageAnalysis && !string.IsNullOrWhiteSpace(customer))
+                {
+                    var separators = new[] { ',', ';' };
+                    var customerEmails = new HashSet<string>(
+                        customer.Split(separators, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(email => email.Trim())
+                            .Where(email => !string.IsNullOrWhiteSpace(email)),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    mailModel.CcList = (mailModel.CcList ?? Enumerable.Empty<string>())
+                        .Where(email => !string.IsNullOrWhiteSpace(email) &&
+                            !customerEmails.Contains(email.Trim()))
+                        .ToList();
+
+                    // Also exclude customers who overlap the analyst or rejector.
+                    mailModel.To = string.Join(", ", (mailModel.To ?? string.Empty)
+                        .Split(separators, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(email => email.Trim())
+                        .Where(email => !string.IsNullOrWhiteSpace(email) &&
+                            !customerEmails.Contains(email)));
+                }
+
                 _mailSender.SendMail(mailModel);
 
                 return true;
@@ -146,7 +186,7 @@ namespace IDM.Service.Common.Service
                 // Combine customer email with analyzedBy email
                 string allRecipients = string.IsNullOrEmpty(customer) ? recipientEmail : $"{customer}, {recipientEmail}";
 
-                string emailContent = BuildEmailHeader(recipientName, "MSL Data") +
+                string emailContent = BuildEmailHeader(recipientName, "MSL Data", analysis: analysis) +
                                         $"<p>The Analysis {analysis} for Job {job} and Trial count of {analysisTrial} has been <span class='success'>{status}</span> by Ma'am/Sir {approverName}</p>" +
                                         BuildApprovalEmailDataSection(approvalEmailData, analysis, recipientName) +
                                         BuildEmailFooter(returnUrl);
@@ -164,11 +204,19 @@ namespace IDM.Service.Common.Service
         }
 
 
-        private string BuildEmailHeader(string recipientName, string emailType, string greeting = "Good day,", string resultText = null)
+        private string BuildEmailHeader(string recipientName, string emailType, string greeting = "Good day,", string resultText = null, string analysis = null)
         {
             string resultMessage = string.IsNullOrWhiteSpace(resultText)
                 ? $"Here is the {emailType} result."
                 : resultText;
+
+            string salutationName = new[] { "Gravimetry", "IC Anion", "PH", "PSD" }
+                .Any(name => string.Equals(
+                    name,
+                    analysis?.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+                ? "Team"
+                : recipientName;
 
             return "<!DOCTYPE html><html><head>" +
                    "<style>" +
@@ -182,7 +230,7 @@ namespace IDM.Service.Common.Service
                    ".warning { font-weight: bold; color: red; }" +
                    ".success { font-weight: bold; color: green; }" +
                    "</style></head><body>" +
-                   $"<p><span class='bold'>Hi {recipientName},</span></p>" +
+                   $"<p><span class='bold'>Hi {salutationName},</span></p>" +
                    $"<p>{greeting}</p>" +
                    $"<p>{resultMessage}</p>";
         }
@@ -238,6 +286,45 @@ namespace IDM.Service.Common.Service
             if (data.NonImageStaging != null)
             {
                 var staging = data.NonImageStaging;
+
+                // Select the parameter to show in approval and rejection emails.
+                string parameterToShow = null;
+
+                if (string.Equals(
+                        analysis?.Trim(),
+                        "Gravimetry",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    parameterToShow = "NVR Solvent (ppm)";
+                }
+                else if (string.Equals(
+                        analysis?.Trim(),
+                        "Ph",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    parameterToShow = "pH";
+                }
+
+                if (parameterToShow != null)
+                {
+                    int parmNameIndex = staging.DetailColumns.FindIndex(column =>
+                        string.Equals(
+                            column,
+                            "ParmName",
+                            StringComparison.OrdinalIgnoreCase));
+
+                    staging.DetailRows = staging.DetailRows
+                        .Where(row =>
+                            parmNameIndex >= 0 &&
+                            row != null &&
+                            parmNameIndex < row.Count &&
+                            string.Equals(
+                                row[parmNameIndex]?.Trim(),
+                                parameterToShow,
+                                StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
                 string stagingHtml = $"<p><span class='bold'>{WebUtility.HtmlEncode(analysis)} Details</span></p><p>";
 
                 foreach (var field in staging.HeaderFields)

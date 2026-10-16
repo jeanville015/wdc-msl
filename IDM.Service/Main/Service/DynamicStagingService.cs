@@ -267,8 +267,9 @@ namespace IDM.Service.Main.Service
 
             if (status == "REJECTED")
             {
+                var customer = await GetCustomerAsync(amethystJob, analysis, analysisTrial);
                 var userListByAnalyis = await _dynamicStagingRepository.GetUserListByAnalysisAsync(analysis);
-                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, approvalEmailData);
+                var resultEmailSendRejectionEmail = await _emailService.SendRejectionEmailAsync(userListByAnalyis, analyzedBy, amethystJob, analysis, analysisTrial, status, userId, approvalEmailData, customer: customer);
                 if (resultEmailSendRejectionEmail) 
                 {
                     result.OperationStatus = true;
@@ -723,29 +724,29 @@ namespace IDM.Service.Main.Service
                         });
                     }
 
-                    // EDX
+                    // EDX - optional
                     string edxPath = GetDet("EdxImage");
-                    string edxExtracted = Path.GetFileName(edxPath);
-                    StagingWImageDetailsBDPDirectories_Edx.Add(new BDPUploadVariables
+                    if (!string.IsNullOrWhiteSpace(edxPath))
                     {
-                        //ObjectId = detailId,
-                        //DataName = detailsDataIdPropertyName,
-                        _DataIdValuePair = new DataIdValuePair
+                        string edxExtracted = Path.GetFileName(edxPath);
+                        StagingWImageDetailsBDPDirectories_Edx.Add(new BDPUploadVariables
                         {
-                            IdName = detailsDataIdPropertyName,
-                            IdValue = detailId
-                        },
-                        _DataNameValuePair = new DataNameValuePair
-                        {
-                            DataName = "BDPEdxImagePath",
-                            DataValue = urlBase + edxExtracted
-                        },
-                        OriginFileDirectory = edxPath,
-                        FileDirectory = detailDir,
-                        FileName = detailFileName,
-                        ExtractedFileName = edxExtracted,
-                        //NewURL = urlBase + edxExtracted
-                    });
+                            _DataIdValuePair = new DataIdValuePair
+                            {
+                                IdName = detailsDataIdPropertyName,
+                                IdValue = detailId
+                            },
+                            _DataNameValuePair = new DataNameValuePair
+                            {
+                                DataName = "BDPEdxImagePath",
+                                DataValue = urlBase + edxExtracted
+                            },
+                            OriginFileDirectory = edxPath,
+                            FileDirectory = detailDir,
+                            FileName = detailFileName,
+                            ExtractedFileName = edxExtracted
+                        });
+                    }
                 }
 
                 /// Copy the image files subject for BDP Upload
@@ -817,6 +818,15 @@ namespace IDM.Service.Main.Service
                 {
                     if (string.IsNullOrWhiteSpace(item.OriginFileDirectory))
                     {
+                        // An annotation is optional. Skip it when its source path is blank.
+                        if (string.Equals(
+                            item._DataNameValuePair?.DataName,
+                            "BDPAnnotationPath",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
                         return new OperationResult
                         {
                             OperationStatus = false,
@@ -876,6 +886,16 @@ namespace IDM.Service.Main.Service
             {
                 try
                 {
+                    // Skip the database URL update for an annotation that was not copied.
+                    if (string.Equals(
+                            item._DataNameValuePair?.DataName,
+                            "BDPAnnotationPath",
+                            StringComparison.OrdinalIgnoreCase)
+                        && string.IsNullOrWhiteSpace(item.OriginFileDirectory))
+                    {
+                        continue;
+                    }
+
                     var updated = await UpdateStagingDataValueAsync(Table, item._DataIdValuePair, item._DataNameValuePair);
                     if (!updated)
                     {
@@ -950,6 +970,187 @@ namespace IDM.Service.Main.Service
                     .ToList())
                 .ToList();
 
+            bool isPsd = table.Columns.Contains("Analysis") &&
+                string.Equals(
+                    Convert.ToString(
+                        firstRow["Analysis"],
+                        CultureInfo.InvariantCulture)?.Trim(),
+                    "PSD",
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (isPsd)
+            {
+                var trialColumns = new HashSet<string>(
+                    StringComparer.OrdinalIgnoreCase)
+                {
+                    "Trial1", "Trial2", "Trial3", "Trial4", "Trial5"
+                };
+
+                // Count each trial column once when any row has a value above zero.
+                // Use the original DataTable, including columns omitted from the email.
+                int actualNoOfTrials = table.Columns.Cast<DataColumn>()
+                    .Where(column => trialColumns.Contains(column.ColumnName))
+                    .Count(column => table.Rows.Cast<DataRow>().Any(row =>
+                    {
+                        decimal trialValue;
+
+                        return decimal.TryParse(
+                            Convert.ToString(
+                                row[column],
+                                CultureInfo.InvariantCulture),
+                            NumberStyles.Float | NumberStyles.AllowThousands,
+                            CultureInfo.InvariantCulture,
+                            out trialValue)
+                            && trialValue > 0;
+                    }));
+
+                // Remove trial fields if any were included among the header items.
+                staging.HeaderFields.RemoveAll(field =>
+                    trialColumns.Contains(field.Name));
+
+                // Place the trial count immediately after TOOL.
+                int toolIndex = staging.HeaderFields.FindIndex(field =>
+                    string.Equals(
+                        field.Name,
+                        "Tool",
+                        StringComparison.OrdinalIgnoreCase));
+
+                staging.HeaderFields.Insert(
+                    toolIndex >= 0 ? toolIndex + 1 : staging.HeaderFields.Count,
+                    new ApprovalEmailFieldData
+                    {
+                        Name = "No. of Trials",
+                        Value = actualNoOfTrials.ToString(
+                            CultureInfo.InvariantCulture)
+                    });
+
+                // Keep column headers and their corresponding row values aligned.
+                var columnsToKeep = staging.DetailColumns
+                    .Select((name, index) => new { Name = name, Index = index })
+                    .Where(column => !trialColumns.Contains(column.Name))
+                    .ToList();
+
+                staging.DetailRows = staging.DetailRows
+                    .Select(row => columnsToKeep
+                        .Select(column =>
+                            column.Index < row.Count
+                                ? row[column.Index]
+                                : string.Empty)
+                        .ToList())
+                    .ToList();
+
+                staging.DetailColumns = columnsToKeep
+                    .Select(column => column.Name)
+                    .ToList();
+            }
+
+            bool isIcAnion = table.Columns.Contains("Analysis") &&
+                string.Equals(
+                    Convert.ToString(
+                        firstRow["Analysis"],
+                        CultureInfo.InvariantCulture)?.Trim(),
+                    "IC ANION",
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (isIcAnion)
+            {
+                var trialColumns = new HashSet<string>(
+                    StringComparer.OrdinalIgnoreCase)
+                {
+                    "Trial1", "Trial2", "Trial3", "Trial4"
+                };
+
+                // Count qualifying trial columns across all original rows,
+                // before excluding any parameters from the email.
+                int actualNoOfTrials = table.Columns.Cast<DataColumn>()
+                    .Where(column => trialColumns.Contains(column.ColumnName))
+                    .Count(column => table.Rows.Cast<DataRow>().Any(row =>
+                    {
+                        decimal trialValue;
+
+                        return decimal.TryParse(
+                            Convert.ToString(
+                                row[column],
+                                CultureInfo.InvariantCulture),
+                            NumberStyles.Float | NumberStyles.AllowThousands,
+                            CultureInfo.InvariantCulture,
+                            out trialValue)
+                            && trialValue > 0;
+                    }));
+
+                var excludedColumns = new HashSet<string>(
+                    StringComparer.OrdinalIgnoreCase)
+                {
+                    "Volume",
+                    "SurfaceArea",
+                    "DilutionFactor",
+                    "Trial1",
+                    "Trial2",
+                    "Trial3",
+                    "Trial4",
+                    "CalculatedTrial1",
+                    "CalculatedTrial2",
+                    "CalculatedTrial3"
+                };
+
+                var excludedParameters = new HashSet<string>(
+                    StringComparer.OrdinalIgnoreCase)
+                {
+                    "Fluoride",
+                    "Nitrite",
+                    "Bromide",
+                    "Nitrate"
+                };
+
+                staging.HeaderFields.RemoveAll(field =>
+                    excludedColumns.Contains(field.Name));
+
+                int toolIndex = staging.HeaderFields.FindIndex(field =>
+                    string.Equals(
+                        field.Name,
+                        "Tool",
+                        StringComparison.OrdinalIgnoreCase));
+
+                staging.HeaderFields.Insert(
+                    toolIndex >= 0 ? toolIndex + 1 : staging.HeaderFields.Count,
+                    new ApprovalEmailFieldData
+                    {
+                        Name = "No. of Trials",
+                        Value = actualNoOfTrials.ToString(
+                            CultureInfo.InvariantCulture)
+                    });
+
+                // The current database column name is ParmName.
+                int parmNameIndex = staging.DetailColumns.FindIndex(column =>
+                    string.Equals(
+                        column,
+                        "ParmName",
+                        StringComparison.OrdinalIgnoreCase));
+
+                var columnsToKeep = staging.DetailColumns
+                    .Select((name, index) => new { Name = name, Index = index })
+                    .Where(column => !excludedColumns.Contains(column.Name))
+                    .ToList();
+
+                staging.DetailRows = staging.DetailRows
+                    .Where(row =>
+                        parmNameIndex < 0 ||
+                        parmNameIndex >= row.Count ||
+                        !excludedParameters.Contains(
+                            row[parmNameIndex]?.Trim() ?? string.Empty))
+                    .Select(row => columnsToKeep
+                        .Select(column =>
+                            column.Index < row.Count
+                                ? row[column.Index]
+                                : string.Empty)
+                        .ToList())
+                    .ToList();
+
+                staging.DetailColumns = columnsToKeep
+                    .Select(column => column.Name)
+                    .ToList();
+            }
+
             return staging;
         }
 
@@ -1011,15 +1212,15 @@ namespace IDM.Service.Main.Service
 
             return formatted; // Returns "Staging2KxId"
 
-            //--NOTE:------------------------------------------------------
-            //This line is returning Staging2kxId instead of Staging2KxId
-            //// Example: DATA_STAGING_2KX -> STAGING_2KX
-            //var parts = tableName.Split('_').Skip(1).ToArray();  
-            //// Transform parts to PascalCase and join: Staging + 2Kx + Id
-            //var formatted = string.Join("", parts.Select(p =>
-            //    char.ToUpper(p[0]) + p.Substring(1).ToLower())) + "Id"; 
-            //return formatted; // Returns "Staging2KxId"
-            //-------------------------------------------------------------
+            //--NOTE:--------------------------------------------------------//
+            //This line is returning Staging2kxId instead of Staging2KxId    //
+            //// Example: DATA_STAGING_2KX -> STAGING_2KX                    //
+            //var parts = tableName.Split('_').Skip(1).ToArray();            //
+            //// Transform parts to PascalCase and join: Staging + 2Kx + Id  //
+            //var formatted = string.Join("", parts.Select(p =>              //
+            //    char.ToUpper(p[0]) + p.Substring(1).ToLower())) + "Id";    //
+            //return formatted; // Returns "Staging2KxId"                    //
+            //---------------------------------------------------------------//
         }
 
     }
